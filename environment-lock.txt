@@ -1,0 +1,9 @@
+# Captured from the installed canonical smoke-test environment on 2026-07-23.
+# Install exact versions with: python -m pip install -r environment-lock.txt
+numpy==2.1.1
+scipy==1.15.2
+matplotlib==3.10.1
+pandas==2.2.3
+gymnasium==1.2.0
+stable-baselines3==2.7.0
+torch==2.6.0+cu124

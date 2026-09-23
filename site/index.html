@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Component Evaluation of Hybrid A2C–APF Guidance in Wind-Perturbed UAV Simulation — Hệ thống hóa kiến thức</title>
+<meta name="description" content="Tài liệu hệ thống hóa toàn bộ kiến thức paper FAIR 2026 về điều khiển lai A2C–APF cho UAV trong mô phỏng có gió: 32 công thức kèm giải thích, thiết kế thực nghiệm H0–H4, kết quả, giới hạn và bài học phương pháp luận.">
+<style>
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --ink:#1b2430; --muted:#5b6672; --line:#dde3ea;
+  --accent:#1565c0; --accent-soft:#e8f1fb; --code-bg:#f2f5f8; --code-ink:#20303f;
+  --ok:#2e7d32; --ok-soft:#eef6ee; --warn:#b45309; --warn-soft:#fdf4e7;
+  --bad:#c62828; --bad-soft:#fdefef; --info:#1565c0; --info-soft:#e8f1fb;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+  --sans:"Segoe UI",Roboto,"Helvetica Neue",Arial,system-ui,sans-serif;
+  --radius:10px;
+}
+[data-theme="dark"]{
+  --bg:#12161c; --panel:#1a2029; --ink:#e6ebf1; --muted:#9aa7b4; --line:#2c3644;
+  --accent:#6ab0f3; --accent-soft:#16283c; --code-bg:#141a22; --code-ink:#d7e1ea;
+  --ok:#7cc47f; --ok-soft:#16261a; --warn:#e0a35c; --warn-soft:#2a2013;
+  --bad:#e08585; --bad-soft:#2a1717; --info:#6ab0f3; --info-soft:#16283c;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--accent);z-index:60}
+.layout{display:flex;max-width:1440px;margin:0 auto}
+nav#toc{width:264px;flex:0 0 264px;position:sticky;top:0;align-self:flex-start;height:100vh;overflow-y:auto;
+  padding:22px 14px 40px 20px;border-right:1px solid var(--line);background:var(--panel)}
+nav#toc .brand{font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav#toc a{display:block;padding:5px 10px;border-radius:7px;color:var(--muted);text-decoration:none;font-size:13.2px;line-height:1.35}
+nav#toc a:hover{background:var(--accent-soft);color:var(--ink)}
+nav#toc a.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+nav#toc .grp{margin-top:12px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);opacity:.75;padding-left:10px}
+main{flex:1;min-width:0;padding:34px clamp(16px,4vw,52px) 90px}
+header.hero{background:linear-gradient(180deg,var(--panel),var(--panel));border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin-bottom:26px}
+.hero .kicker{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--bg);color:var(--muted)}
+.chip.ok{color:var(--ok);border-color:var(--ok);background:var(--ok-soft)}
+.chip.info{color:var(--info);border-color:var(--info);background:var(--info-soft)}
+h1{font-size:clamp(22px,3vw,31px);line-height:1.25;margin:0 0 10px;letter-spacing:-.01em}
+.hero p.sub{color:var(--muted);margin:0 0 16px;max-width:74ch}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat .v{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.stat .l{font-size:12px;color:var(--muted);margin-top:2px}
+.stat.ok .v{color:var(--ok)} .stat.warn .v{color:var(--warn)} .stat.bad .v{color:var(--bad)} .stat.info .v{color:var(--info)}
+section{margin:0 0 44px;scroll-margin-top:18px}
+section>h2{font-size:22px;margin:0 0 6px;padding-bottom:8px;border-bottom:2px solid var(--line);letter-spacing:-.01em}
+section>h2 .no{color:var(--accent);font-weight:800;margin-right:8px}
+section .lede{color:var(--muted);margin:6px 0 18px;max-width:80ch}
+h3{font-size:16.5px;margin:26px 0 10px}
+p{margin:10px 0;max-width:86ch}
+ul,ol{max-width:86ch}
+li{margin:6px 0}
+code.mi{font-family:var(--mono);font-size:.88em;background:var(--code-bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--code-ink)}
+.formula{background:var(--code-bg);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:var(--radius);
+  padding:12px 16px;margin:14px 0;overflow-x:auto}
+.formula .ftag{display:inline-block;font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--accent);
+  background:var(--accent-soft);border:1px solid var(--accent);border-radius:6px;padding:1px 8px;margin-bottom:8px}
+.formula .ftitle{font-weight:600;font-size:13.5px;margin-left:8px;color:var(--ink)}
+.formula pre{margin:0;font-family:var(--mono);font-size:13.4px;line-height:1.8;color:var(--code-ink);white-space:pre}
+.formula .fnote{margin-top:8px;font-size:13px;color:var(--muted);font-family:var(--sans)}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px;background:var(--panel);
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+caption{caption-side:top;text-align:left;font-size:13px;color:var(--muted);padding:0 0 6px}
+th{background:var(--bg);text-align:left;font-weight:650;font-size:13px;color:var(--ink);padding:9px 12px;border-bottom:1px solid var(--line)}
+td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tbody tr:nth-child(even){background:color-mix(in srgb,var(--bg) 55%,transparent)}
+.tblwrap{overflow-x:auto}
+.callout{border:1px solid var(--line);border-left:5px solid var(--info);border-radius:var(--radius);
+  background:var(--info-soft);padding:12px 16px;margin:16px 0}
+.callout .ct{font-weight:700;font-size:14px;margin-bottom:6px}
+.callout.warn{border-left-color:var(--warn);background:var(--warn-soft)}
+.callout.danger{border-left-color:var(--bad);background:var(--bad-soft)}
+.callout.success{border-left-color:var(--ok);background:var(--ok-soft)}
+.callout p{margin:6px 0}
+figure{margin:18px 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}
+figure img{max-width:100%;height:auto;display:block;border-radius:6px}
+figure.diagram img{background:#fff}
+figcaption{font-size:12.8px;color:var(--muted);padding:8px 4px 2px;line-height:1.5}
+figcaption b{color:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:16px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h4{margin:0 0 6px;font-size:14.5px}
+.card p{margin:0;font-size:13.5px;color:var(--muted)}
+details{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:14px 0;padding:4px 16px}
+summary{cursor:pointer;font-weight:650;padding:10px 0;font-size:14.5px}
+details[open] summary{border-bottom:1px solid var(--line);margin-bottom:10px}
+details pre.mermaid{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;
+  font-family:var(--mono);font-size:12.6px;line-height:1.6;color:var(--code-ink)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:5px;margin-right:6px;vertical-align:1px}
+.tag.ok{color:var(--ok);background:var(--ok-soft);border:1px solid var(--ok)}
+.tag.warn{color:var(--warn);background:var(--warn-soft);border:1px solid var(--warn)}
+.tag.bad{color:var(--bad);background:var(--bad-soft);border:1px solid var(--bad)}
+.tag.info{color:var(--info);background:var(--info-soft);border:1px solid var(--info)}
+.tag.mute{color:var(--muted);background:var(--bg);border:1px solid var(--line)}
+.toolbar{position:fixed;right:18px;bottom:18px;display:flex;gap:8px;z-index:50}
+.toolbar button{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;
+  color:var(--ink);cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.toolbar button:hover{border-color:var(--accent);color:var(--accent)}
+footer{border-top:1px solid var(--line);margin-top:40px;padding-top:18px;color:var(--muted);font-size:13px}
+@media (max-width:1080px){nav#toc{display:none}}
+@media print{
+  nav#toc,.toolbar,#progress{display:none!important}
+  body{background:#fff}
+  main{padding:0}
+  section{break-inside:auto}
+  figure,.formula,table,.callout{break-inside:avoid}
+  a{color:inherit;text-decoration:none}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="layout">
+<nav id="toc" aria-label="Mục lục">
+  <p class="brand">A2C–APF · FAIR 2026</p>
+  <div class="grp">Mở đầu</div>
+  <a href="#s0">Cách đọc tài liệu</a>
+  <a href="#s1">1 · Vấn đề &amp; câu hỏi</a>
+  <a href="#s2">2 · Kiến thức nền</a>
+  <div class="grp">Mô hình toán</div>
+  <a href="#s3">3 · MDP: obs &amp; action</a>
+  <a href="#s4">4 · Động lực học</a>
+  <a href="#s5">5 · APF &amp; blending</a>
+  <a href="#s6">6 · Hàm thưởng</a>
+  <a href="#s7">7 · Gió AR(1)</a>
+  <a href="#s8">8 · A2C &amp; huấn luyện</a>
+  <div class="grp">Thực nghiệm</div>
+  <a href="#s9">9 · Thiết kế H0–H4</a>
+  <a href="#s10">10 · Chỉ số &amp; thống kê</a>
+  <a href="#s11">11 · Kết quả</a>
+  <a href="#s12">12 · Diễn giải cơ chế</a>
+  <div class="grp">Kết &amp; phụ lục</div>
+  <a href="#s13">13 · Threats to validity</a>
+  <a href="#s14">14 · Kết luận &amp; tương lai</a>
+  <a href="#s15">15 · Reproducibility</a>
+  <a href="#s16">16 · Thuật ngữ &amp; bài tập</a>
+</nav>
+<main>
+
+<header class="hero">
+  <div class="kicker">
+    <span class="chip ok">Đã nộp FAIR 2026</span>
+    <span class="chip info">IEEE conference · 7/8 trang</span>
+    <span class="chip">Tài liệu học tập · 16 phần · 32 công thức</span>
+  </div>
+  <h1>Component Evaluation of Hybrid A2C–APF Guidance in Wind-Perturbed UAV Simulation</h1>
+  <p class="sub">Hệ thống hóa toàn bộ kiến thức của paper từ đầu đến cuối: mô hình toán, từng công thức kèm giải thích
+  bằng lời và đơn vị, giao thức thực nghiệm, kết quả, diễn giải cơ chế, giới hạn và bài học phương pháp luận.
+  Nguồn: <code class="mi">paper/latex/vnict_hybrid_main.tex</code> (bản canonical) và gói <code class="mi">reproducibility/</code>.</p>
+  <p class="sub" style="margin-bottom:0">Tác giả: <b>Hieu Ta Chi</b> (Thuyloi University) · <b>Huy Nguyen Anh</b> (Thuyloi University) · <b>Hoa Vu Minh</b> (Foreign Trade University)</p>
+  <div class="stats">
+    <div class="stat ok"><div class="v">1000/1000</div><div class="l">H0 Hybrid · SR 1.000 (CI 0.996–1.000)</div></div>
+    <div class="stat warn"><div class="v">830/1000</div><div class="l">H1 chỉ A2C · 58 va chạm · 112 hết giờ</div></div>
+    <div class="stat bad"><div class="v">55/1000</div><div class="l">H2 chỉ APF · 905 va chạm · 40 hết giờ</div></div>
+    <div class="stat info"><div class="v">20</div><div class="l">đơn vị suy luận (map × training run)</div></div>
+    <div class="stat ok"><div class="v">69/69</div><div class="l">claim đối soát · 0 MISMATCH</div></div>
+  </div>
+</header>
+
+<section id="s0">
+  <h2><span class="no">§0</span>Cách đọc tài liệu này</h2>
+  <p class="lede">Mười sáu phần đi đúng theo trình tự của paper. Mỗi công thức có mã <b>CT-n</b>, kèm giải thích bằng lời,
+  đơn vị và cạm bẫy diễn giải. Phần đối chiếu với mục trong paper nằm ở tiêu đề từng phần.</p>
+  <div class="callout">
+    <div class="ct">Quy ước trình bày công thức</div>
+    <p>Công thức viết bằng ký hiệu Unicode trong khung monospace (trang không nhúng thư viện toán ngoài). Đối chiếu 1-1 với
+    bản PDF: ví dụ <b>CT-8</b> chính là Equation (6) của paper. Những công thức thuộc kiến thức nền mà paper không in ra
+    (policy gradient, GAE, Wilson) được gắn nhãn <span class="tag info">nền</span> để không nhầm là đóng góp của bài.</p>
+    <p>Hình nào là <b>mô phỏng minh họa</b> (không phải dữ liệu thí nghiệm) đều được ghi chú đỏ ngay trên hình.</p>
+  </div>
+  <div class="tblwrap"><table>
+    <caption>Bản đồ nội dung — phần của tài liệu ↔ mục của paper</caption>
+    <thead><tr><th style="width:34px">#</th><th>Phần</th><th>Nội dung chính</th><th style="width:150px">Mục trong paper</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Vấn đề &amp; câu hỏi nghiên cứu</td><td>Vì sao lai A2C + APF; paper tuyên bố và KHÔNG tuyên bố điều gì</td><td>§I, §II</td></tr>
+      <tr><td>2</td><td>Kiến thức nền &amp; bảng ký hiệu</td><td>RL, APF, động lực học, gió, AABB, thống kê — cần nắm gì trước khi đọc</td><td>§II</td></tr>
+      <tr><td>3</td><td>MDP: quan sát &amp; hành động</td><td>Observation 12 chiều; hành động là LỰC chuẩn hóa, không phải gia tốc</td><td>§III-A</td></tr>
+      <tr><td>4</td><td>Động lực học point-mass</td><td>Lực, drag tương đối, Euler bán ẩn, clamp độ cao, chân trời H = 1507</td><td>§III-B, III-C</td></tr>
+      <tr><td>5</td><td>APF &amp; blending thích ứng</td><td>Lực hút, lực đẩy theo tâm AABB, chuẩn hóa rồi clip, λ theo khoảng cách</td><td>§III-D</td></tr>
+      <tr><td>6</td><td>Hàm thưởng</td><td>Sáu số hạng; vì sao phạt độ cao là code chết; hai quy ước khoảng cách</td><td>§III-E</td></tr>
+      <tr><td>7</td><td>Mô hình gió AR(1)</td><td>Nhiễu màu, hệ số √(1−φ²), ma trận tương quan, giới hạn Dryden-lite</td><td>§III-F</td></tr>
+      <tr><td>8</td><td>A2C: nền thuật toán &amp; huấn luyện</td><td>Actor–critic, GAE, entropy; siêu tham số; 5M bước; seed không bitwise</td><td>§III-G</td></tr>
+      <tr><td>9</td><td>Thiết kế thực nghiệm H0–H4</td><td>Cấu trúc lồng nhau, 1000 rollout, 50 slot → 32 seed thật, ghép cặp</td><td>§IV-A</td></tr>
+      <tr><td>10</td><td>Chỉ số đo &amp; công thức thống kê</td><td>Wilson, efficiency, clearance, jerk/accel, Wilcoxon, Cohen's d<sub>z</sub></td><td>§IV-B</td></tr>
+      <tr><td>11</td><td>Kết quả</td><td>Bảng số liệu + biểu đồ; mean vs median; H2 jitter thấp ≠ tốt</td><td>§V</td></tr>
+      <tr><td>12</td><td>Diễn giải cơ chế</td><td>Lịch λ, vì sao barrier = timeout còn corridor = collision, vì sao H2 chết</td><td>§V-D, §VI</td></tr>
+      <tr><td>13</td><td>Threats to validity</td><td>Internal / measurement / statistical / external — 12 mục</td><td>§VII</td></tr>
+      <tr><td>14</td><td>Kết luận &amp; hướng tương lai</td><td>Ba câu dữ liệu ủng hộ; sáu việc cần làm tiếp</td><td>§VIII</td></tr>
+      <tr><td>15</td><td>Reproducibility &amp; audit trail</td><td>Ledger, SHA-256, traceability code↔paper, vì sao CONDITIONAL PASS</td><td>gói reproducibility/</td></tr>
+      <tr><td>16</td><td>Thuật ngữ &amp; câu hỏi ôn tập</td><td>Glossary Anh–Việt; 18 câu hỏi theo ba mức; bài học phương pháp luận</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s1">
+  <h2><span class="no">§1</span>Vấn đề nghiên cứu và câu hỏi được kiểm soát</h2>
+  <p class="lede">Paper không đề xuất thuật toán mới. Nó trả lời một câu hỏi hẹp, đo được, trên một implementation cố định. §I · §II</p>
+  <figure class="diagram"><img src="assets/diagrams/research_loop.svg" alt="Vòng nghiên cứu năm bước của paper">
+    <figcaption><b>Hình 1.1 — Vòng nghiên cứu.</b> Paper này là một <i>component evaluation</i>: bước cuối giới hạn tuyên bố
+    đúng bằng những gì dữ liệu ủng hộ, thay vì phóng đại thành một hệ thống tổng quát.</figcaption></figure>
+  <h3>Ba yêu cầu đồng thời của bay thấp trong môi trường chật</h3>
+  <ul>
+    <li><b>Tiến bộ liên tục về đích</b> — cần một chính sách có mục tiêu dài hạn.</li>
+    <li><b>Tránh va chạm</b> — cần phản xạ cục bộ với hình học vật cản.</li>
+    <li><b>Điều khiển không biến đổi đột ngột dưới nhiễu</b> — cần lệnh mượt khi có gió.</li>
+  </ul>
+  <div class="tblwrap"><table>
+    <caption>Bốn họ phương pháp và hệ quả cho thiết kế nghiên cứu</caption>
+    <thead><tr><th>Họ phương pháp</th><th>Điểm mạnh</th><th>Điểm yếu theo paper</th><th>Hệ quả thiết kế</th></tr></thead>
+    <tbody>
+      <tr><td>Planner lấy mẫu (RRT, RRT*)</td><td>Quy hoạch tốt khi biết map; bảo đảm tiệm cận tối ưu</td><td>Cấu trúc thông tin khác: cần map biết trước, cần replanning; không phải bộ điều khiển phản xạ vòng kín</td><td>Chỉ làm mốc tham chiếu, không so sánh trực tiếp</td></tr>
+      <tr><td>APF (Khatib 1986)</td><td>Rẻ, tính online, phản xạ tức thời</td><td>Local minima, dao động, nhạy gain</td><td>Dùng làm guidance prior, không làm planner hoàn chỉnh</td></tr>
+      <tr><td>RL (A2C, PPO, SAC)</td><td>Học ánh xạ state → action; thích ứng với nhiễu</td><td>Kết quả phụ thuộc seed, reward, observation, termination; khó quy kết nguyên nhân</td><td>Chọn A2C vì ÍT thành phần nhất → dễ quy kết đóng góp thành phần khác</td></tr>
+      <tr><td>APF + RL (2024–2025)</td><td>Đã phổ biến: shaping reward, ràng buộc action, blend trực tiếp</td><td>Việc ghép tự nó không còn mới</td><td>Chuyển trọng tâm sang ĐÁNH GIÁ THÀNH PHẦN</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout success">
+    <div class="ct">Câu hỏi nghiên cứu</div>
+    <p><i>“Một kênh dẫn hướng APF thêm được giá trị đo lường nào vào một implementation A2C dẫn đường cố định?”</i></p>
+  </div>
+  <div class="cards">
+    <div class="card"><h4>Đóng góp 1 — Bộ điều khiển được đặc tả đầy đủ</h4><p>Controller A2C–APF với observation 12 chiều, ngữ nghĩa lực chuẩn hóa, động lực học point-mass, gió tương quan và blending thích ứng theo khoảng cách.</p></div>
+    <div class="card"><h4>Đóng góp 2 — Chiến dịch 4 map tách bạch thành phần</h4><p>H0 hybrid, H1 chỉ A2C (khớp ngân sách và giao thức), H2 chỉ APF, H4 chẩn đoán nội suy cùng lưới.</p></div>
+    <div class="card"><h4>Đóng góp 3 — Phân tích ghép cặp ở cấp training run</h4><p>Suy luận trên 20 đơn vị (map × training run) và accounting đầy đủ kết thúc episode, thay vì coi 1000 rollout là độc lập.</p></div>
+  </div>
+  <div class="callout warn">
+    <div class="ct">Ba điều paper chủ động KHÔNG tuyên bố</div>
+    <ul style="margin:6px 0">
+      <li>Không đề xuất thuật toán RL mới và không đề xuất khung quy hoạch đường tổng quát.</li>
+      <li>Không xếp hạng với PPO, SAC hay RRT — vì chưa có tuning riêng, ngân sách ngang nhau và nhiều seed cho từng thuật toán.</li>
+      <li>Không tuyên bố đường bay ngắn hơn, an toàn hơn (clearance) hay nhanh hơn — các khác biệt đó KHÔNG được dữ liệu ủng hộ.</li>
+    </ul>
+  </div>
+  <div class="callout danger">
+    <div class="ct">Giới hạn chi phối toàn bộ cách diễn giải: bất đối xứng thông tin</div>
+    <p>Observation của A2C chỉ có [vị trí, vận tốc, dịch chuyển tới đích, gió] — <b>không có hình học vật cản</b>.
+    H0 nhận hình học vật cản thông qua kênh APF; H1 không nhận gì cả. Vậy nên so sánh H0−H1 đo giá trị của
+    <b>cả kênh APF cùng với đầu vào hình học đặc quyền của nó</b>, chứ không cô lập được “phép tính trường thế năng”.
+    Muốn cô lập, phải cho H1 một đặc trưng vật cản tương đương mà không có blend APF.</p>
+  </div>
+</section>
+
+<section id="s2">
+  <h2><span class="no">§2</span>Kiến thức nền và bảng ký hiệu</h2>
+  <p class="lede">Sinh viên cần nắm cột giữa trước khi đọc phần công thức. Mỗi khái niệm đều được dùng ở một mục cụ thể của paper.</p>
+  <div class="tblwrap"><table>
+    <thead><tr><th style="width:220px">Khối kiến thức</th><th>Cần nắm điều gì</th><th style="width:220px">Dùng ở đâu</th></tr></thead>
+    <tbody>
+      <tr><td>MDP / RL cơ bản</td><td>Trạng thái, hành động, phần thưởng, γ; policy π(a|s); mục tiêu tối đa E[Σ γᵗ rₜ]</td><td>Nền của §3 và §6</td></tr>
+      <tr><td>Policy gradient &amp; actor–critic</td><td>∇J ≈ E[∇log π(a|s)·A(s,a)]; critic V(s) giảm phương sai của advantage</td><td>Vì sao chọn A2C; §8</td></tr>
+      <tr><td>GAE(γ, λ)</td><td>Ưu thế ước lượng bằng tổng có chiết khấu của TD-error; λ = 0.95 cân bằng bias/variance</td><td>Siêu tham số huấn luyện A2C</td></tr>
+      <tr><td>Artificial Potential Field</td><td>Trường hút kéo về đích + trường đẩy quanh vật cản; điểm yếu: local minima, dao động, nhạy gain</td><td>§5 và lý do H2 thất bại</td></tr>
+      <tr><td>Động lực học point-mass</td><td>F = m·a; lực cản tỉ lệ vận tốc tương đối; tích phân Euler bán ẩn</td><td>§4</td></tr>
+      <tr><td>Quá trình ngẫu nhiên AR(1)</td><td>Nhiễu có màu (tương quan thời gian) thay vì nhiễu trắng; phương sai dừng</td><td>§7 mô hình gió</td></tr>
+      <tr><td>Hình học AABB &amp; swept collision</td><td>Hộp chữ nhật trục aligned; phép thử slab trên đoạn pₜ → pₜ₊₁ để chống tunneling</td><td>§4 ngữ nghĩa va chạm</td></tr>
+      <tr><td>Nội suy cubic spline</td><td>Đa thức bậc 3 từng khúc, liên tục C²; dùng làm mượt quỹ đạo rời rạc</td><td>H4 — chẩn đoán hậu xử lý</td></tr>
+      <tr><td>Thống kê suy luận</td><td>Khoảng tin cậy Wilson; Wilcoxon signed-rank ghép cặp; Cohen's d<sub>z</sub>; p-value khám phá &amp; đa bội</td><td>§10 và toàn bộ §11</td></tr>
+      <tr><td>Đơn vị suy luận &amp; pseudoreplication</td><td>Phân biệt rollout (mô tả) với (map × training run) (suy luận); lặp seed làm phồng n</td><td>Điểm phương pháp luận quan trọng nhất</td></tr>
+    </tbody>
+  </table></div>
+  <details>
+    <summary>Bảng ký hiệu toán học đầy đủ (23 ký hiệu)</summary>
+    <div class="tblwrap"><table>
+      <thead><tr><th style="width:230px">Ký hiệu</th><th>Ý nghĩa và đơn vị</th></tr></thead>
+      <tbody>
+        <tr><td><code class="mi">pₜ, v ∈ ℝ³</code></td><td>vị trí và vận tốc UAV tại bước t (m; m/s)</td></tr>
+        <tr><td><code class="mi">g ∈ ℝ³</code></td><td>vị trí đích; g − pₜ là vector dịch chuyển tới đích</td></tr>
+        <tr><td><code class="mi">wₜ ∈ ℝ³</code></td><td>vận tốc gió tại bước t (m/s) — là vận tốc KHÔNG KHÍ, không phải lực</td></tr>
+        <tr><td><code class="mi">sₜ ∈ ℝ¹²</code></td><td>quan sát của A2C: [pₜ, vₜ, g − pₜ, wₜ]</td></tr>
+        <tr><td><code class="mi">aₜᴬ²ᶜ ∈ [−1,1]³</code></td><td>hành động policy: lệnh LỰC chuẩn hóa theo từng trục</td></tr>
+        <tr><td><code class="mi">uₜ ∈ [−1,1]³</code></td><td>lệnh chuẩn hóa sau khi trộn (hybrid) — đầu vào của động lực học</td></tr>
+        <tr><td><code class="mi">λₜ ∈ [0.15, 0.55]</code></td><td>trọng số trộn APF, phụ thuộc khoảng cách tới đích</td></tr>
+        <tr><td><code class="mi">cᵢ ∈ ℝ³</code></td><td>tâm của vật cản AABB thứ i</td></tr>
+        <tr><td><code class="mi">dᵢ</code></td><td>khoảng cách từ UAV tới TÂM vật cản i (khác clearance bề mặt)</td></tr>
+        <tr><td><code class="mi">δₜ</code></td><td>clearance có dấu tới BỀ MẶT AABB gần nhất (dùng trong reward và metric)</td></tr>
+        <tr><td><code class="mi">d₀ = 6 m</code></td><td>bán kính ảnh hưởng của lực đẩy APF</td></tr>
+        <tr><td><code class="mi">k_att = 0.04, k_rep = 18</code></td><td>hệ số gain hút / đẩy của APF</td></tr>
+        <tr><td><code class="mi">m = 0.5 kg, k_d = 0.12</code></td><td>khối lượng và hệ số cản tuyến tính</td></tr>
+        <tr><td><code class="mi">g₀ = 9.81 m/s², Δt = 0.1 s</code></td><td>gia tốc trọng trường và bước tích phân</td></tr>
+        <tr><td><code class="mi">F_max = 12 N</code></td><td>giới hạn lực THEO TỪNG TRỤC (không phải theo chuẩn vector)</td></tr>
+        <tr><td><code class="mi">H = 1507</code></td><td>số transition tối đa của một episode (chân trời)</td></tr>
+        <tr><td><code class="mi">nₜ</code></td><td>số transition đã dùng tới thời điểm t</td></tr>
+        <tr><td><code class="mi">φ = exp(−Δt/τ)</code></td><td>hệ số suy giảm của quá trình AR(1) mô hình gió</td></tr>
+        <tr><td><code class="mi">τ = 0.9 s</code></td><td>hằng số thời gian tương quan của gió</td></tr>
+        <tr><td><code class="mi">σ_gust = 1.2 m/s</code></td><td>độ lệch chuẩn dừng của thành phần gió giật ngang</td></tr>
+        <tr><td><code class="mi">γ = 0.99, λ_GAE = 0.95</code></td><td>chiết khấu RL và tham số GAE</td></tr>
+        <tr><td><code class="mi">E</code></td><td>hiệu suất đường bay thành công ∈ (0, 1]</td></tr>
+        <tr><td><code class="mi">d_z = Δ̄ / s_Δ</code></td><td>cỡ hiệu ứng ghép cặp (Cohen's d<sub>z</sub>)</td></tr>
+        <tr><td><code class="mi">z = 1.96</code></td><td>phân vị chuẩn cho khoảng tin cậy 95% (Wilson)</td></tr>
+      </tbody>
+    </table></div>
+  </details>
+</section>
+
+<section id="s3">
+  <h2><span class="no">§3</span>MDP: quan sát và ngữ nghĩa hành động</h2>
+  <p class="lede">Phần quyết định paper đo được cái gì. Đọc kỹ hai công thức đầu tiên. §III-A · traceability #1, #2, #6</p>
+  <p>Bài toán được phát biểu thành một MDP episodic <code class="mi">M = (S, A, P, R, γ)</code> với <code class="mi">γ = 0.99</code>. Mỗi bước, môi trường phơi ra trạng thái:</p>
+  <div class="formula">
+    <span class="ftag">CT-1</span><span class="ftitle">Quan sát 12 chiều của A2C</span>
+<pre>sₜ = [ pₜ , vₜ , g − pₜ , wₜ ]  ∈ ℝ¹²
+     └─3─┘ └─3─┘ └───3───┘ └─3─┘
+    vị trí  vận  dịch chuyển   gió
+           tốc   tới đích</pre>
+  </div>
+  <ul>
+    <li>Vì sao dùng <code class="mi">g − pₜ</code> thay vì <code class="mi">g</code>: đây là vector dịch chuyển tương đối, giúp policy bất biến với vị trí tuyệt đối của đích (map 300 m có đích ở (300, 150, 5)); mạng không phải học một hằng số tọa độ.</li>
+    <li><b>Không có thành phần vật cản nào</b>: không khoảng cách, không góc, không occupancy. Vật cản chỉ đi vào bốn nơi: APF, số hạng clearance của reward, phép thử va chạm, và các metric offline.</li>
+    <li>Hệ quả phương pháp luận: mọi khác biệt H0−H1 đều bị trộn lẫn với lượng thông tin bổ sung mà kênh APF mang vào (xem callout ở §1).</li>
+    <li><code class="mi">wₜ</code> là vận tốc không khí, không phải lực — xem CT-4.</li>
+  </ul>
+  <div class="formula">
+    <span class="ftag">CT-2</span><span class="ftitle">Hành động là LỆNH LỰC chuẩn hóa, không phải gia tốc</span>
+<pre>aₜᴬ²ᶜ ∈ [−1, 1]³                      (policy output, liên tục)
+F_cmd = 12 N × clip(aₜᴬ², −1, 1)      (clip THEO TỪNG TRỤC)
+⇒ ‖F_cmd‖ tối đa = 12·√3 ≈ 20.78 N     (không phải 12 N)</pre>
+  </div>
+  <ul>
+    <li><b>Cạm bẫy 1:</b> giới hạn 12 N áp dụng cho từng trục, không áp cho chuẩn vector. Vector lực thực tế có thể đạt ~20.78 N theo hướng chéo. Mô tả sai chỗ này sẽ làm sai toàn bộ diễn giải về gia tốc.</li>
+    <li><b>Cạm bẫy 2:</b> đây là lực, nên gia tốc còn phụ thuộc khối lượng, trọng lực, drag và gió (CT-4). Không được đọc <code class="mi">a = 1</code> thành “gia tốc 1 m/s²”.</li>
+    <li>Gia tốc ngang lớn nhất có thể ra lệnh: 12 N / 0.5 kg = 24 m/s² — gần 2.4 g. Multirotor thật không đạt được; đây là lý do paper từ chối nói về flyability.</li>
+  </ul>
+  <figure><img src="assets/figures/controller_architecture.png" alt="Sơ đồ bộ điều khiển lai như đã cài đặt">
+    <figcaption><b>Hình 3.1 — Bộ điều khiển lai như đã cài đặt</b> (figure gốc của paper). Observation 12 chiều không chứa
+    hình học vật cản; hình học AABB chỉ dành cho kênh APF và phép thử va chạm. Blend dùng λₜ ∈ [0.15, 0.55] phụ thuộc khoảng cách.</figcaption></figure>
+</section>
+
+<section id="s4">
+  <h2><span class="no">§4</span>Động lực học point-mass, chân trời episode và ngữ nghĩa va chạm</h2>
+  <p class="lede">Bốn công thức vật lý + một công thức chân trời. Tham số: m = 0.5 kg, k_d = 0.12, g₀ = 9.81 m/s², Δt = 0.1 s. §III-B, III-C · traceability #7–#12, #20</p>
+  <div class="formula">
+    <span class="ftag">CT-3</span><span class="ftitle">Tổng lực tác dụng</span>
+<pre>Fₜ = 12 · clip(uₜ, −1, 1) − m · g₀ · e_z
+
+với e_z là vector đơn vị hướng lên (+z); trọng lực luôn kéo xuống
+uₜ là lệnh CHUẨN HÓA sau khi đã trộn A2C và APF (xem CT-14)</pre>
+  </div>
+  <div class="formula">
+    <span class="ftag">CT-4</span><span class="ftitle">Gia tốc — drag tác dụng lên VẬN TỐC TƯƠNG ĐỐI</span>
+<pre>aₜ = ( Fₜ − k_d · (vₜ − wₜ) ) / m
+
+(vₜ − wₜ) = vận tốc của UAV so với khối không khí = "air velocity"</pre>
+  </div>
+  <ul>
+    <li><b>Đây là điểm mô hình tinh tế nhất.</b> Gió KHÔNG được cộng thẳng vào vị trí. Nó đi vào qua drag: nếu UAV bay đúng bằng vận tốc gió (vₜ = w) thì drag = 0, tức “bay theo gió” thì không cảm nhận lực cản.</li>
+    <li>So với mô hình cũ trong README gốc của repo nghiên cứu (<code class="mi">aₓ = (Fₓ + 0.3·wₓ − k_d·vₓ)/m</code>): ở đó gió là lực cộng trực tiếp. Hai mô hình KHÁC nhau về vật lý — README gốc đã lỗi thời so với paper.</li>
+    <li>Với k_d = 0.12 và m = 0.5 kg, vận tốc tới hạn khi lực đẩy cân bằng drag là 12/0.12 = 100 m/s theo một trục — mô hình gần như không có giới hạn tốc độ thực tế.</li>
+  </ul>
+  <div class="formula">
+    <span class="ftag">CT-5, CT-6</span><span class="ftitle">Tích phân Euler bán ẩn (semi-implicit / symplectic)</span>
+<pre>vₜ₊₁ = vₜ + aₜ · Δt          (cập nhật VẬN TỐC trước)
+pₜ₊₁ = pₜ + vₜ₊₁ · Δt        (rồi dùng vận tốc MỚI để cập nhật vị trí)
+
+Δt = 0.1 s  ⇒  1 transition = 0.1 s thời gian mô phỏng</pre>
+    <div class="fnote">Khác Euler hiện (<code class="mi">pₜ₊₁ = pₜ + v·Δt</code>) ở chỗ dùng vₜ₊₁. Euler bán ẩn bảo toàn năng lượng tốt hơn cho hệ có thành phần bảo thủ, ít bị “nổ” số học khi bước tích phân lớn — hợp lý cho mô phỏng RL chạy hàng triệu bước.</div>
+  </div>
+  <div class="formula">
+    <span class="ftag">CT-7</span><span class="ftitle">Clamp độ cao và reset vận tốc dọc</span>
+<pre>z_cl = clamp(zₜ₊₁, 5 m, 6 m)
+nếu z_cl ≠ zₜ₊₁ (clamp kích hoạt):  v_z ← 0
+
+⇒ không gian bay thực chất là một "tấm slab" 2.5-D dày 1 m
+⇒ hệ quả: số hạng phạt độ cao r_z trong reward là CODE CHẾT (xem CT-18)</pre>
+  </div>
+  <div class="formula">
+    <span class="ftag">CT-8</span><span class="ftitle">Chân trời episode — Equation (6) trong paper</span>
+<pre>H = ⌊ ( ‖g_xy − p₀,xy‖ / (v_ref · Δt) ) · 1.8 ⌋ + 300 ,   v_ref = 5 m/s
+
+Với map 300 m:  start (0, 0, 5), goal (300, 150, 5)
+  ‖g_xy − p₀,xy‖ = √(300² + 150²) = 335.41 m
+  H = ⌊(335.41 / (5 · 0.1)) · 1.8⌋ + 300 = ⌊670.82 · 1.8⌋ + 300 = ⌊1207.48⌋ + 300 = 1507
+  ⇒ thời gian tối đa = 1507 × 0.1 s ≈ 150.7 s</pre>
+  </div>
+  <ul>
+    <li>Ý nghĩa từng thành phần: <code class="mi">‖g_xy − p₀,xy‖/(v_ref·Δt)</code> là số bước nếu bay thẳng với vận tốc tham chiếu 5 m/s; hệ số <code class="mi">1.8</code> là dư địa cho đường vòng tránh vật cản và gió thổi lệch; <code class="mi">+300</code> bước là đệm cố định cho pha tiếp cận đích.</li>
+    <li>Chân trời TỰ ĐỘNG co giãn theo kích thước map — cùng một giao thức áp dụng được cho map ngắn/dài mà không chỉnh tay.</li>
+    <li>Giá trị 1507 (không phải 500 như tài liệu cũ) giải thích vì sao H1 có episode chạy tới trần và vì sao SD của steps lên tới 451.0.</li>
+  </ul>
+  <div class="formula">
+    <span class="ftag">CT-9</span><span class="ftitle">Ngữ nghĩa kết thúc episode — mỗi episode đúng MỘT trạng thái</span>
+<pre>collision = swept_AABB(pₜ → pₜ₊₁, obstacle_i, radius = 0)   với mọi i
+success   = ( ‖g − p_T‖ &lt; 3 m )  AND  ( NOT collision )
+timeout   = hết H transition mà chưa success
+
+Thứ tự ưu tiên: COLLISION được xét TRƯỚC success
+⇒ chạm vật cản đúng lúc vào trong 3 m → tính là collision</pre>
+  </div>
+  <ul>
+    <li><b>Swept collision (phép thử slab):</b> kiểm tra cả ĐOẠN thẳng từ pₜ đến pₜ₊₁ chứ không chỉ điểm cuối. Với Δt = 0.1 s và vận tốc ~10 m/s, mỗi bước UAV đi ~1 m — đủ “xuyên hầm” qua thành mỏng nếu chỉ test điểm cuối.</li>
+    <li><b>Bán kính phồng UAV = 0</b>: UAV được coi là một điểm. Giả định lạc quan, cần nêu khi bàn về an toàn.</li>
+    <li><b>Accounting đầy đủ</b>: success + collision + timeout = 1000 cho mỗi cấu hình; có test tự động kiểm tra “đúng một trạng thái kết thúc trên mỗi dòng” (0 vi phạm).</li>
+    <li><b>Vị trí ban đầu có nhiễu:</b> p₀ = (0, 0, 5) cộng nhiễu đều U(−0.5, +0.5) m từng tọa độ trước khi clamp độ cao — tránh policy học thuộc một điểm khởi đầu duy nhất.</li>
+  </ul>
+  <figure class="diagram"><img src="assets/diagrams/episode_flow.svg" alt="Luồng kết thúc một episode">
+    <figcaption><b>Hình 4.2 — Luồng một transition tới trạng thái kết thúc.</b> Collision được xét TRƯỚC success; hết chân trời H = 1507 mà chưa về đích thì timeout. Mỗi episode nhận đúng một nhãn trong ba nhãn.</figcaption></figure>
+  <figure><img src="assets/figures/environment_25d.png" alt="Môi trường 3D và hình chiếu từ trên xuống">
+    <figcaption><b>Hình 4.1 — Môi trường vật cản và quỹ đạo hybrid đã thực thi</b> (figure gốc của paper), nhìn 3D và chiếu từ trên xuống. Các hộp nâng cao biểu diễn vật cản AABB giữa điểm xuất phát và đích chung.</figcaption></figure>
+</section>
+<section id="s5">
+  <h2><span class="no">§5</span>Artificial Potential Field và cơ chế trộn thích ứng</h2>
+  <p class="lede">Trái tim kỹ thuật của paper: ba công thức APF + hai công thức blend. Chú ý quy ước khoảng cách tới TÂM vật cản. §III-D · traceability #13–#17</p>
+  <div class="formula">
+    <span class="ftag">CT-10</span><span class="ftitle">Lực hút về đích</span>
+<pre>qₜ = g − pₜ                                   (vector dịch chuyển tới đích)
+F_att(pₜ) = k_att · qₜ / (‖qₜ‖ + ε) ,   k_att = 0.04 ,  ε = 10⁻⁶
+
+⇒ ‖F_att‖ ≈ 0.04 (hằng số, không phụ thuộc khoảng cách) — chỉ giữ HƯỚNG</pre>
+    <div class="fnote">Đây là gradient của thế hút tuyến tính (thế tỉ lệ khoảng cách), không phải thế bậc hai. Vì chuẩn hóa theo <code class="mi">‖qₜ‖</code> nên lực hút không tăng khi càng gần đích — tránh hiện tượng “lao vào đích” với vận tốc lớn. ε = 10⁻⁶ chỉ để chống chia 0 khi UAV đứng đúng tại đích.</div>
+  </div>
+  <div class="formula">
+    <span class="ftag">CT-11, CT-12</span><span class="ftitle">Lực đẩy từ vật cản — dạng Khatib kinh điển, nhưng đo tới TÂM</span>
+<pre>dᵢ = ‖pₜ − cᵢ‖ + ε        (cᵢ = TÂM của AABB thứ i, không phải điểm gần nhất trên mặt)
+
+                 ⎧ k_rep · (1/dᵢ − 1/d₀) · (pₜ − cᵢ)/dᵢ³    nếu dᵢ &lt; d₀
+F_rep,ᵢ(pₜ) =   ⎨
+                 ⎩ 0                                            nếu dᵢ ≥ d₀
+
+với k_rep = 18 ,  d₀ = 6 m</pre>
+  </div>
+  <ul>
+    <li><b>Đọc công thức này thế nào:</b> <code class="mi">(1/dᵢ − 1/d₀)</code> là độ lớn thế đẩy, bằng 0 đúng tại biên d₀ và tiến tới ∞ khi dᵢ → 0; <code class="mi">(pₜ − cᵢ)/dᵢ</code> là vector đơn vị chỉ hướng đẩy ra xa tâm. Nhân hai cái lại với một <code class="mi">1/dᵢ²</code> nữa (gradient của thế) → ra số mũ <code class="mi">dᵢ³</code> ở mẫu.</li>
+    <li><b>Vai trò của d₀ = 6 m:</b> APF chỉ là phản xạ CỤC BỘ. Ngoài 6 m tính từ tâm vật cản, lực đẩy bằng đúng 0 → UAV không bị “đẩy” bởi cả bản đồ, chỉ bởi thứ ở ngay cạnh.</li>
+    <li><b>Lỗi thiết kế được paper tự khai báo:</b> vì dᵢ đo tới TÂM, một khối hộp lớn có thể ở rất gần mà APF vẫn im lặng.</li>
+  </ul>
+  <div class="callout danger">
+    <div class="ct">Ví dụ số cho thấy APF under-repel (nên giảng kỹ cho sinh viên)</div>
+    <p>Một khối AABB cạnh 20 m, tâm cách UAV 12 m. Khoảng cách tới MẶT gần nhất chỉ là 12 − 10 = <b>2 m</b> — tức sắp đâm.
+    Nhưng vì dᵢ = 12 m ≥ d₀ = 6 m nên <code class="mi">F_rep = 0</code>: APF hoàn toàn không phản ứng.
+    Ngược lại, metric clearance mà paper báo cáo lại dùng khoảng cách BỀ MẶT (2 m). Hai đại lượng khác nhau này là lời
+    giải thích cơ chế chính cho tỉ lệ va chạm 90.5% của H2.</p>
+  </div>
+  <div class="formula">
+    <span class="ftag">CT-13</span><span class="ftitle">Tổng hợp lực APF: chuẩn hóa có điều kiện rồi clip</span>
+<pre>F_APF = F_att + Σᵢ F_rep,ᵢ
+
+nếu ‖F_APF‖ &gt; 1:   F_APF ← F_APF / ‖F_APF‖      (chỉ khi vượt 1)
+aₜᴬᴾᶠ = clip(F_APF, −1, 1)                        (clip theo từng thành phần)
+
+THỨ TỰ QUAN TRỌNG: normalize TRƯỚC, clip SAU</pre>
+    <div class="fnote">Chuẩn hóa có điều kiện (chỉ khi chuẩn &gt; 1) giữ nguyên hướng và giữ tỉ lệ tương đối giữa hút/đẩy khi lực còn nhỏ; clip theo thành phần đảm bảo đầu ra nằm đúng trong không gian hành động [−1,1]³ để trộn được với output của A2C. Đảo thứ tự (clip trước rồi chuẩn hóa) sẽ làm méo hướng lực.</div>
+  </div>
+  <div class="formula">
+    <span class="ftag">CT-14, CT-15</span><span class="ftitle">Trộn lồi thích ứng theo khoảng cách tới đích</span>
+<pre>uₜ = (1 − λₜ) · aₜᴬ²ᶜ  +  λₜ · aᴬᴾᶠ
+
+λₜ = clip( 1 − ‖g − pₜ‖/300 , 0.15 , 0.55 )
+
+  khoảng cách tới đích   335.4 m   300 m   255 m   180 m   135 m    0 m
+  λₜ (giá trị thực tế)    0.15     0.15    0.15    0.40    0.55    0.55
+  ý nghĩa                tin RL ←────────────────────────→ tin APF</pre>
+  </div>
+  <ul>
+    <li><b>Vì sao là trộn lồi:</b> cả hai thành phần đều nằm trong [−1,1]³ và λ ∈ [0,1], nên uₜ cũng nằm trong [−1,1]³ — không cần clip lại và không bao giờ vượt giới hạn lực.</li>
+    <li><b>Logic điều khiển:</b> ở pha hành trình xa đích, bài toán chủ yếu là “đi tới” → tin policy học được (λ = 0.15). Ở pha tiếp cận, hình học vật cản quanh khe hở quan trọng hơn → tăng vai trò APF (λ tới 0.55).</li>
+    <li><b>Giả thuyết cơ chế:</b> vì là hỗn hợp lồi, APF có thể đã “làm dịu” những thay đổi lệnh lớn của A2C ở vùng cuối → giải thích jitter thấp hơn. Paper nói rõ đây chỉ là GIẢ THUYẾT CHẨN ĐOÁN vì không có action trace tách riêng hai kênh.</li>
+    <li><b>Cấu hình đối chứng:</b> H1 đặt <code class="mi">policy_mode = "a2c"</code> nên bỏ hẳn phép trộn (tương đương λ = 0, manifest đặt <code class="mi">apf_weight = 0.0</code>); H2 đặt <code class="mi">policy_mode = "apf"</code> nên <code class="mi">uₜ = aₜᴬᴾᶠ</code> với action của policy là vector 0.</li>
+  </ul>
+  <figure><img src="assets/charts/lambda_schedule.png" alt="Lịch trộn lambda theo khoảng cách tới đích">
+    <figcaption><b>Hình 5.1 — Lịch λₜ theo khoảng cách tới đích.</b> Đường nét đứt là lịch gốc chưa clip; đường đậm là giá trị
+    thực tế sau khi kẹp vào [0.15, 0.55]. Vùng tô màu là dải hoạt động của λ.</figcaption></figure>
+</section>
+
+<section id="s6">
+  <h2><span class="no">§6</span>Hàm thưởng — từng số hạng và từng con số</h2>
+  <p class="lede">Sáu thành phần. Chú ý hai điểm: dải clearance chỉ thưởng chứ không phạt, và số hạng độ cao không bao giờ chạy. §III-E · traceability #13, #18, #19</p>
+  <div class="formula">
+    <span class="ftag">CT-16</span><span class="ftitle">Reward tại bước t</span>
+<pre>rₜ = 3·(dₜ₋₁ − dₜ)        ① shaping tiến bộ về đích
+   − 0.05                  ② phạt thời gian (mỗi bước)
+   − 200·𝟙[collision]      ③ phạt va chạm
+   + Bₜ·𝟙[success]         ④ thưởng về đích  (xem CT-17)
+   + 0.3·(δₜ − 2)·𝟙[2 &lt; δₜ &lt; 8]   ⑤ thưởng giữ khoảng cách an toàn
+   + r_z                   ⑥ phạt vượt dải độ cao (xem CT-18 — BẤT HOẠT)
+
+với dₜ = ‖g − pₜ‖ tính SAU transition, δₜ = clearance CÓ DẤU tới bề mặt AABB gần nhất</pre>
+  </div>
+  <div class="tblwrap"><table>
+    <caption>Sáu số hạng của hàm thưởng</caption>
+    <thead><tr><th style="width:26px">#</th><th style="width:190px">Số hạng</th><th style="width:150px">Đơn vị / dải</th><th>Giải thích và hệ quả</th></tr></thead>
+    <tbody>
+      <tr><td>①</td><td><code class="mi">3·(dₜ₋₁ − dₜ)</code></td><td>điểm / mét tiến lại gần</td><td>Dạng potential-based shaping: chỉ thưởng cho SỰ THAY ĐỔI khoảng cách nên không tạo cực tiểu giả. Tiến 1 m được +3, lùi 1 m bị −3. Tín hiệu dày duy nhất dẫn dắt policy ở xa đích.</td></tr>
+      <tr><td>②</td><td><code class="mi">−0.05 / bước</code></td><td>điểm</td><td>Chống lảng vảng. Với H = 1507 bước, tổng phạt tối đa ≈ −75 điểm — nhỏ hơn nhiều so với thưởng về đích (≥ 80) nên không khuyến khích tự kết thúc sớm.</td></tr>
+      <tr><td>③</td><td><code class="mi">−200 khi va chạm</code></td><td>điểm</td><td>Phạt thưa nhưng lớn gấp ~2.5 lần thưởng về đích tối đa → gradient ưu tiên an toàn. Vì thưa nên policy chỉ học được qua những lần thực sự đâm.</td></tr>
+      <tr><td>④</td><td><code class="mi">Bₜ khi về đích</code></td><td>80 → 150 điểm</td><td>Xem CT-17: thưởng GIẢM dần theo số bước đã dùng nhưng có sàn 80 điểm.</td></tr>
+      <tr><td>⑤</td><td><code class="mi">0.3·(δₜ − 2)</code> trong dải 2–8 m</td><td>tối đa +1.8 điểm/bước</td><td>Tăng dần theo clearance trong dải → khuyến khích đi giữa chứ không sát vật cản. NGOÀI dải (δ ≥ 8) không thưởng thêm; DƯỚI 2 m KHÔNG có phạt trực tiếp nào ngoài ③ khi thực sự đâm — một khoảng trống thiết kế đáng phê bình.</td></tr>
+      <tr><td>⑥</td><td><code class="mi">r_z</code></td><td>−15·(khoảng vượt)</td><td>CODE CHẾT — xem CT-18.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="formula">
+    <span class="ftag">CT-17</span><span class="ftitle">Thưởng về đích phụ thuộc thời gian</span>
+<pre>Bₜ = max( 80 , 150 · (1 − nₜ/H) )
+
+  bay rất nhanh (nₜ → 0)     : Bₜ → 150
+  bay hết chân trời (nₜ = H) : 150·0 = 0  → nhưng max() ép lên 80
+  điểm hoà vốn               : 150·(1 − nₜ/H) = 80  ⇒ nₜ = 0.4667·H ≈ 703 bước</pre>
+    <div class="fnote">Vai trò của <code class="mi">max(80, ·)</code>: đảm bảo về đích LUÔN có lãi ròng so với va chạm (−200) hoặc timeout (0), kể cả khi bay chậm. Nếu không có sàn này, một episode chậm sẽ nhận thưởng ~0 và policy có thể học cách “kết thúc sớm” để tránh phạt thời gian.</div>
+  </div>
+  <div class="formula">
+    <span class="ftag">CT-18</span><span class="ftitle">Phạt độ cao — và vì sao nó không bao giờ chạy</span>
+<pre>r_z = −15·(5 − z)   nếu z &lt; 5 m
+r_z = −15·(z − 6)   nếu z &gt; 6 m
+r_z = 0             nếu 5 ≤ z ≤ 6
+
+NHƯNG: độ cao đã bị clamp về [5, 6] ở CT-7 TRƯỚC khi reward đọc z
+⇒ tại thời điểm tính reward luôn có z ∈ [5, 6] ⇒ cả hai nhánh phạt không thể kích hoạt</pre>
+  </div>
+  <div class="callout warn">
+    <div class="ct">Vì sao paper vẫn in công thức của một số hạng chết?</div>
+    <p>Vì nguyên tắc <b>implementation alignment</b> (Henderson 2018): mô tả controller phải khớp CHÍNH XÁC với code đã chạy,
+    kể cả phần không hoạt động. Giấu nó đi sẽ khiến người tái lập gặp một reward function khác. Muốn số hạng này có tác
+    dụng, phải tính reward TRƯỚC khi clamp, hoặc bỏ clamp và để UAV thực sự bay ra khỏi dải.</p>
+  </div>
+  <div class="tblwrap"><table>
+    <caption>Hai quy ước khoảng cách trong cùng một hệ thống — bắt buộc phải phân biệt</caption>
+    <thead><tr><th style="width:90px">Đại lượng</th><th style="width:230px">Đo tới đâu</th><th style="width:280px">Dùng ở đâu</th><th>Hệ quả</th></tr></thead>
+    <tbody>
+      <tr><td><code class="mi">dᵢ</code></td><td>TÂM của AABB</td><td>Lực đẩy APF (CT-11, CT-12)</td><td>Under-repel với khối lớn; APF có thể im lặng khi sắp đâm</td></tr>
+      <tr><td><code class="mi">δₜ</code></td><td>BỀ MẶT gần nhất của AABB (có dấu)</td><td>Số hạng ⑤ của reward và metric clearance báo cáo trong paper</td><td>Phản ánh đúng rủi ro va chạm</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s7">
+  <h2><span class="no">§7</span>Mô hình gió tương quan AR(1) (Dryden-lite)</h2>
+  <p class="lede">Gió là nhiễu CÓ MÀU, không phải nhiễu trắng. Bốn công thức và một chứng minh ngắn về phương sai dừng. §III-F · seed_provenance.md</p>
+  <div class="formula">
+    <span class="ftag">CT-19</span><span class="ftitle">Hệ số suy giảm theo bước thời gian</span>
+<pre>φ = exp(−Δt / τ) ,   τ = 0.9 s ,  Δt = 0.1 s
+φ = exp(−0.1/0.9) = exp(−0.1111) ≈ 0.8948   (giá trị suy ra, paper không in số)</pre>
+    <div class="fnote">τ = 0.9 s nghĩa là một cơn gió giật mất khoảng 0.9 s để suy giảm còn 1/e ≈ 37% biên độ. Đây chính là “quán tính” của khí quyển: gió không đổi hướng tức thời giữa hai bước mô phỏng.</div>
+  </div>
+  <div class="formula">
+    <span class="ftag">CT-20</span><span class="ftitle">Nhiễu đổi mới có tương quan chéo giữa các trục</span>
+<pre>ηₜ = L · ξₜ ,   ξₜ ~ N(0, I₃)
+
+L·Lᵀ có:  tương quan chéo ngang (x↔y) = 0.35
+          tương quan ngang–dọc = 0
+          hệ số phương sai trục dọc = 0.09  (⇒ tỉ lệ std dọc = √0.09 = 0.3)</pre>
+  </div>
+  <ul>
+    <li>L là phân tích Cholesky của ma trận hiệp phương sai mong muốn — cách chuẩn để biến nhiễu trắng độc lập thành nhiễu có cấu trúc tương quan.</li>
+    <li>Tương quan ngang 0.35: gió tạt theo x thường đi kèm thành phần theo y — mô phỏng luồng gió thổi xiên, không phải ba trục độc lập.</li>
+    <li>Hệ số dọc 0.09: nhiễu dọc yếu hơn nhiều (0.3 lần), hợp với thực tế rối khí quyển ngang mạnh hơn dọc ở tầng thấp. Kết hợp với clamp độ cao [5, 6] m, trục z gần như bị khống chế.</li>
+  </ul>
+  <div class="formula">
+    <span class="ftag">CT-21, CT-22</span><span class="ftitle">Cập nhật gió giật và gió tổng</span>
+<pre>gₜ₊₁ʷ = φ · gₜʷ  +  1.2 · √(1 − φ²) · ηₜ
+wₜ    = w_base + gₜʷ
+
+w_base = [ 2·cos θ , 2·sin θ , 0 ] ,   θ ~ U(0, 2π)  (lấy mẫu MỘT lần tại reset)</pre>
+  </div>
+  <div class="callout">
+    <div class="ct">Vì sao phải có √(1 − φ²)? — chứng minh ba dòng nên dạy sinh viên</div>
+    <p>Gọi Var(gₜʷ) = σ². Ở trạng thái dừng: <code class="mi">σ² = φ²σ² + 1.2²(1 − φ²)</code></p>
+    <p><code class="mi">⇒ σ²(1 − φ²) = 1.2²(1 − φ²)  ⇒  σ² = 1.2²  ⇒  σ = 1.2 m/s</code></p>
+    <p style="color:var(--muted)">Nếu bỏ hệ số này, biên độ gió giật sẽ trôi theo φ và phụ thuộc độ dài episode — mỗi map sẽ có một “mức gió” khác nhau, làm hỏng khả năng so sánh. Với φ ≈ 0.8948 thì hệ số nhân thực tế là 1.2 × √(1 − 0.8007) ≈ 1.2 × 0.4465 ≈ <b>0.536</b>.</p>
+  </div>
+  <ul>
+    <li><b>Quy mô nhiễu thực tế:</b> gió nền 2 m/s + gió giật std 1.2 m/s ngang (0.36 m/s dọc) ⇒ tổng vận tốc gió điển hình 2–3.5 m/s, tức ~20–35% tốc độ tham chiếu 5 m/s. Đáng kể nhưng không cực đoan.</li>
+    <li><b>Một realization gió cho cả episode:</b> hướng gió nền và chuỗi nhiễu AR(1) đều lấy từ RNG của env, seed bằng numerical seed. Vì vậy H0 và H1 ở cùng slot đánh giá gặp ĐÚNG MỘT cơn gió — điều kiện để ghép cặp hợp lệ.</li>
+    <li><b>Giới hạn paper tự nêu:</b> đây không phải phổ Dryden đã kiểm chứng, cũng không phải mô hình khí động học đô thị. Vì không có điều kiện no-wind hay mức gió khác, paper KHÔNG thiết lập được robustness theo cường độ gió — mặc dù tiêu đề có chữ “Wind-Perturbed”. H3 (no-wind) và H5 (strong-wind) đã ĐỊNH NGHĨA trong manifest nhưng bị loại khỏi tập bằng chứng.</li>
+  </ul>
+  <figure><img src="assets/charts/wind_ar1_illustrative.png" alt="Minh họa quá trình gió AR1">
+    <figcaption><b>Hình 7.1 — MINH HỌA quá trình gió AR(1)</b> theo CT-19 → CT-22 (seed 20260923).
+    <span style="color:var(--bad);font-weight:600">Đây là mô phỏng minh họa do tài liệu này sinh ra, KHÔNG phải dữ liệu thí nghiệm của paper.</span>
+    Trái: một realization gió ba trục; phải: phân bố tốc độ gió ngang với φ = 0.8948.</figcaption></figure>
+</section>
+
+<section id="s8">
+  <h2><span class="no">§8</span>A2C: nền thuật toán và cấu hình huấn luyện</h2>
+  <p class="lede">Ba công thức nền (KHÔNG in trong paper — kiến thức bổ trợ để hiểu vì sao chọn A2C) và bảng siêu tham số đã dùng. §III-G · seed_provenance.md · computational_requirements.md</p>
+  <div class="callout">
+    <div class="ct"><span class="tag info">nền</span> CT-23 → CT-25 là kiến thức nền về A2C (SB3), paper không trình bày các công thức này</div>
+    <p>Chúng giúp hiểu “advantage” trong tên gọi A2C nghĩa là gì và entropy coefficient 0.02 tác động vào đâu.</p>
+  </div>
+  <div class="formula">
+    <span class="ftag">CT-23</span><span class="ftitle">Policy gradient với advantage <span class="tag mute">nền</span></span>
+<pre>∇θ J(θ) = E[ ∇θ log πθ(aₜ|s) · Â ]
+
+Âₜ = Qπ(sₜ,aₜ) − Vπ(sₜ)   (advantage: hành động này tốt hơn trung bình bao nhiêu)
+⇒ log π được đẩy LÊN nếu Â &gt; 0 và kéo XUỐNG nếu Â &lt; 0</pre>
+  </div>
+  <div class="formula">
+    <span class="ftag">CT-24</span><span class="ftitle">Hàm mất mát A2C mà SB3 tối thiểu hóa <span class="tag mute">nền</span></span>
+<pre>L(θ, φ) = − E[ log πθ(aₜ|s) · Â ]        (actor: leo đồi chính sách)
+        + c₁ · E[ ( Vφ(sₜ) − Rₜ )² ]        (critic: hồi quy giá trị, c₁ = 0.5)
+        − c₂ · H[ πθ(·|sₜ) ]                (entropy: khuyến khích khám phá, c₂ = 0.02)</pre>
+  </div>
+  <div class="formula">
+    <span class="ftag">CT-25</span><span class="ftitle">GAE — cách tính Â trong thực tế <span class="tag mute">nền</span></span>
+<pre>δₜ = rₜ + γ·Vφ(sₜ₊₁) − Vφ(sₜ)                (TD-error)
+Âₜᴳᴬᴱ(γ,λ) = Σₗ₌₀^∞ (γλ)ˡ · δₜ₊ₗ           (γ = 0.99, λ_GAE = 0.95)
+
+λ → 0 : Â ≈ δₜ           (bias cao, phương sai thấp)
+λ → 1 : Â ≈ Monte-Carlo  (bias thấp, phương sai cao)
+λ = 0.95: điểm cân bằng thực nghiệm</pre>
+  </div>
+  <div class="tblwrap"><table>
+    <caption>Siêu tham số huấn luyện của chiến dịch canonical</caption>
+    <thead><tr><th style="width:230px">Tham số</th><th style="width:230px">Giá trị</th><th>Vai trò / vì sao chọn</th></tr></thead>
+    <tbody>
+      <tr><td>Thư viện &amp; policy</td><td>Stable-Baselines3, MlpPolicy</td><td>Mạng MLP chuẩn, ít thành phần → dễ quy kết nguyên nhân; SB3 là implementation được kiểm chứng rộng rãi</td></tr>
+      <tr><td>Thiết bị</td><td>CPU (device = 'cpu' cưỡng bức)</td><td>A2C với observation 12 chiều không cần GPU; loại bỏ biến thiên do CUDA</td></tr>
+      <tr><td>Learning rate</td><td>3 × 10⁻⁴</td><td>Giá trị mặc định phổ biến cho actor–critic</td></tr>
+      <tr><td>n_steps (rollout)</td><td>256</td><td>On-policy: thu 256 bước rồi cập nhật</td></tr>
+      <tr><td>γ (chiết khấu)</td><td>0.99</td><td>Tầm nhìn hiệu dụng ~100 bước = 10 s mô phỏng</td></tr>
+      <tr><td>λ (GAE)</td><td>0.95</td><td>Cân bằng bias/variance cho advantage</td></tr>
+      <tr><td>Entropy coefficient</td><td>0.02</td><td>Giữ khám phá; quá nhỏ → policy sập sớm vào nghiệm dao động</td></tr>
+      <tr><td>Max gradient norm</td><td>0.5</td><td>Cắt gradient, ổn định huấn luyện khi có reward −200 thưa và lớn</td></tr>
+      <tr><td>Ngân sách huấn luyện</td><td>5.000.000 bước / unit</td><td>Tổng 40 unit học được (H0 + H1) = 200 triệu bước</td></tr>
+      <tr><td>Số env song song khi train</td><td>1 env (n_envs = 1)</td><td>Đúng như paper: <code class="mi">run_rigorous_manifest.py:146</code> đặt n_envs = 1 cho chiến dịch canonical. Pipeline so sánh cũ có preset n_envs = 4 cho chế độ 300k bước — đó KHÔNG phải run dùng cho paper</td></tr>
+      <tr><td>Seed huấn luyện</td><td>101, 211, 307, 401, 503</td><td>5 model ĐỘC LẬP cho mỗi map — không phải 5 checkpoint của một lần chạy</td></tr>
+      <tr><td>Chính sách khi đánh giá</td><td>deterministic = True</td><td>Loại bỏ phương sai lấy mẫu hành động để đo đúng chất lượng policy</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn">
+    <div class="ct">Ba lưu ý về thuật ngữ và tính tái lập</div>
+    <ul style="margin:6px 0">
+      <li><b>“Checkpoint” là từ sai.</b> Code (<code class="mi">train_model</code>) huấn luyện một model MỚI từ đầu cho mỗi cặp (map, seed). Paper canonical đã dùng “five independently trained runs (models) per map”.</li>
+      <li><b>PyTorch không được seed tường minh.</b> Chỉ có <code class="mi">random</code>, <code class="mi">numpy</code> và VecEnv nhận training seed; không có <code class="mi">torch.manual_seed</code>. Do đó huấn luyện lại từ đầu KHÔNG tái lập bitwise. Đánh giá lại từ checkpoint đã lưu thì tất định.</li>
+      <li><b>Chi phí tính toán:</b> manifest dự phóng ~44.8 ngày chạy TUẦN TỰ cho toàn bộ ma trận huấn luyện được (4 thuật toán × 5 map × 5 seed). Phần bằng chứng thực tế chỉ là tập con A2C 4 map, song song hóa được trên nhiều nhân. Máy tham chiếu: Ryzen 9 9950X (16C/32T), 64 GB RAM, RTX 3090 (không dùng cho A2C).</li>
+    </ul>
+  </div>
+</section>
+
+<section id="s9">
+  <h2><span class="no">§9</span>Thiết kế thực nghiệm: H0–H4, cấu trúc lồng nhau và số học của mẫu</h2>
+  <p class="lede">Phần dễ bị reviewer tấn công nhất — và cũng là phần paper xử lý cẩn thận nhất. §IV-A · experimental_design.md</p>
+  <figure class="diagram"><img src="assets/diagrams/hierarchy.svg" alt="Hệ thống phân cấp thực nghiệm">
+    <figcaption><b>Hình 9.1 — Cấu trúc lồng nhau của một cấu hình.</b> Ghép cặp H0–H1 thực hiện ở tầng (map × training run);
+    vì vậy n của kiểm định là 20, còn 1000 rollout chỉ dùng để mô tả.</figcaption></figure>
+  <div class="tblwrap"><table>
+    <caption>Bốn cấu hình được đánh giá</caption>
+    <thead><tr><th style="width:44px">ID</th><th style="width:200px">Loại</th><th style="width:130px">Map / unit</th><th style="width:110px">Huấn luyện</th><th style="width:80px">Rollout</th><th style="width:80px">Học?</th><th>Ghi chú diễn giải</th></tr></thead>
+    <tbody>
+      <tr><td><b>H0</b></td><td>Hybrid: A2C + APF blend</td><td>4 map / 20 unit</td><td>5M bước × 20</td><td>1000</td><td>Có</td><td>Cấu hình chính được đề xuất</td></tr>
+      <tr><td><b>H1</b></td><td>Chỉ A2C (tắt blend APF)</td><td>4 map / 20 unit</td><td>5M bước × 20</td><td>1000</td><td>Có</td><td>Đối chứng GHÉP CẶP; khớp ngân sách, map, realization đánh giá — nhưng KHÔNG khớp thông tin vật cản</td></tr>
+      <tr><td><b>H2</b></td><td>Chỉ APF (không học)</td><td>4 map / nhãn 5 seed</td><td>0</td><td>1000</td><td>Không</td><td>5 nhãn seed chỉ là bookkeeping — không phải 5 bộ điều khiển độc lập</td></tr>
+      <tr><td><b>H4</b></td><td>Chẩn đoán hậu xử lý spline</td><td>dùng lại quỹ đạo H0</td><td>0</td><td>1000</td><td>Không</td><td>Resample cùng lưới → gần như no-op; KHÔNG phải ablation làm mượt</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Pseudoreplication: 50 slot chỉ có 32 seed phân biệt</h3>
+  <div class="formula">
+    <span class="ftag">CT-26</span><span class="ftitle">Cách sinh numerical seed và vì sao bị chồng lấn</span>
+<pre>numerical_seed = base_seed + episode_index
+base_seed ∈ {1009, 1013, 1019, 1021, 1031} ,  episode_index ∈ {0..9}
+
+Các cửa sổ 10 slot sinh ra:
+  1009 → [1009 … 1018]
+  1013 → [1013 … 1022]     chồng 1009 ở 1013–1018
+  1019 → [1019 … 1028]     chồng 1013 ở 1019–1022
+  1021 → [1021 … 1030]     chồng 1019 ở 1021–1028
+  1031 → [1031 … 1040]
+
+⇒ 50 slot nhưng chỉ 32 giá trị seed phân biệt (1009–1040)
+⇒ 18 slot / unit là LẶP Y HỆT (cùng map, cùng model, cùng seed, policy tất định)
+⇒ toàn chiến dịch: 18 × 60 unit = 1080 instance trùng, đã kiểm chứng byte-identical
+   về status / steps / clearance / jitter bởi validate_ledger.py</pre>
+  </div>
+  <figure><img src="assets/charts/seed_slots.png" alt="Lưới 50 slot seed với các ô trùng lặp">
+    <figcaption><b>Hình 9.2 — Lưới 50 slot seed của một unit.</b> Ô xanh là seed lần đầu xuất hiện (32 ô), ô đỏ là lặp y hệt (18 ô).
+    Đây là pseudoreplication: paper vẫn báo cáo tỉ lệ trên 50 slot nhưng KHÔNG dùng rollout làm đơn vị suy luận.</figcaption></figure>
+  <ul>
+    <li><b>Vì sao đây là vấn đề:</b> nếu coi 50 rollout là 50 quan sát độc lập thì n bị phồng 1.56 lần, khoảng tin cậy hẹp giả tạo và p-value nhỏ giả tạo.</li>
+    <li><b>Paper xử lý thế nào:</b> tỉ lệ vẫn báo cáo trên 50 slot (đúng như đã chạy), nhưng suy luận dùng 20 đơn vị (map × training run); Wilson CI chỉ được gọi là “descriptive”.</li>
+    <li><b>Cách sửa nếu làm lại:</b> chọn 5 base seed cách nhau ≥ 10 (ví dụ 1009, 1019, 1029, 1039, 1049) → 50 slot với 50 seed phân biệt, không đổi số lượng rollout.</li>
+    <li><b>Lưu ý tinh tế:</b> cùng một numerical seed ở hai unit KHÁC nhau vẫn là hai điều kiện khác nhau (map hoặc model khác). Chỉ trùng lặp bên trong một unit. Trường <code class="mi">full_condition_hash = map_hash | controller | numerical_seed</code> trong ledger nắm đúng điều này.</li>
+  </ul>
+  <figure class="diagram"><img src="assets/diagrams/pairing.svg" alt="Ghép cặp H0 và H1">
+    <figcaption><b>Hình 9.3 — Ghép cặp H0–H1.</b> Năm yếu tố khớp (map, seed, ngân sách, realization gió/reset, số rollout)
+    và hai yếu tố cố ý không khớp (trọng số policy, thông tin vật cản). Hai hàng đỏ là lý do paper không thể tuyên bố “APF tốt hơn học thuần túy”.</figcaption></figure>
+  <div class="cards">
+    <div class="card"><h4>Vì sao H2 không có lặp huấn luyện thật</h4><p>H2 là APF thuần, không học (model = None, timesteps = 0). Năm nhãn seed mỗi map chỉ để giữ cấu trúc sổ sách — chúng là các lượt đánh giá lặp lại của MỘT bộ điều khiển cố định, không phải năm mẫu độc lập. Không được dùng H2 trong bất kỳ suy luận ghép cặp nào.</p></div>
+    <div class="card"><h4>Vì sao H4 gần như là no-op</h4><p>Spline tham số hóa từng tọa độ theo chỉ số mẫu chuẩn hóa rồi resample về max(20, N) điểm. Mọi quỹ đạo H0 đều có N ≥ 20 nên số điểm vào = số điểm ra, và spline được đánh giá đúng tại các vị trí tham số cách đều ban đầu. Nó chạy SAU rollout nên không thể đổi action, va chạm hay kết quả: jitter và accel không đổi tới độ chính xác số học.</p></div>
+  </div>
+  <div class="tblwrap"><table>
+    <caption>Bốn map 300 m (density 0.8)</caption>
+    <thead><tr><th style="width:180px">Map</th><th style="width:280px">Đặc trưng hình học</th><th>Vai trò trong lập luận</th></tr></thead>
+    <tbody>
+      <tr><td><code class="mi">map-random-01</code></td><td>Trường vật cản ngẫu nhiên có seed</td><td>Điều kiện chung nhất; H1 yếu nhất ở đây (140/250)</td></tr>
+      <tr><td><code class="mi">map-corridor-01</code></td><td>Hành lang tạo bởi các hộp ghép cặp</td><td>Ràng buộc ngang lặp lại → phơi bày dao động; 10 failure của H1 đều là va chạm</td></tr>
+      <tr><td><code class="mi">map-barrier-01</code></td><td>Barrier hai phần có khe hở</td><td>Kiểm tra khả năng duy trì tiến bộ qua khe; 50 failure của H1 đều là hết giờ</td></tr>
+      <tr><td><code class="mi">map-mixed-01</code></td><td>Barrier + ngẫu nhiên</td><td>Trần kết quả của H1 (250/250) → bằng chứng APF KHÔNG cần thiết cho mọi layout</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s10">
+  <h2><span class="no">§10</span>Chỉ số đo và công thức thống kê</h2>
+  <p class="lede">Bốn nhóm chỉ số và bốn công cụ suy luận. Chú ý ranh giới giữa MÔ TẢ và SUY LUẬN. §IV-B</p>
+  <h3>10.1 Nhóm chỉ số kết quả rời rạc</h3>
+  <div class="formula">
+    <span class="ftag">CT-27</span><span class="ftitle">Khoảng tin cậy Wilson cho một tỉ lệ <span class="tag mute">nền</span> — dùng làm MÔ TẢ</span>
+<pre>        p̂ + z²/(2n)  ±  z · √( p(1−p̂)/n + z²/(4n²) )
+CI  =  ─────────────────────────────────────────────────
+                       1 + z²/n
+
+z = 1.96 (95%) ;  n = 1000 ;  p̂ = success/1000
+
+  H0: p̂ = 1.000 → CI [0.996, 1.000]     (chú ý: chặn trên đúng bằng 1)
+  H1: p̂ = 0.830 → CI [0.805, 0.852]
+  H2: p̂ = 0.055 → CI [0.042, 0.071]</pre>
+    <div class="fnote">Vì sao dùng Wilson thay vì khoảng chuẩn Wald <code class="mi">p̂ ± z√(p̂(1−p̂)/n)</code>: Wald sụp đổ khi p̂ gần 0 hoặc 1 (với H0, Wald cho biên độ 0 → CI [1, 1] vô nghĩa). Wilson vẫn hợp lệ ở biên và với n nhỏ. Nhưng paper nhấn mạnh các CI này chỉ MÔ TẢ 1000 rollout — suy luận thật nằm ở kiểm định ghép cặp.</div>
+  </div>
+  <h3>10.2 Nhóm chỉ số chất lượng đường bay</h3>
+  <div class="formula">
+    <span class="ftag">CT-28</span><span class="ftitle">Hiệu suất đường bay thành công</span>
+<pre>E = min( 1 ,  ‖g − p₀‖ / Σₜ₌₀^{T−1} ‖pₜ₊₁ − pₜ‖ )
+
+tử số   = độ dài đường thẳng từ điểm XUẤT PHÁT tới đích
+mẫu số  = độ dài đường bay thực tế (tổng quãng đường từng bước)
+E = 1  ⇔ bay thẳng hoàn toàn ;  E càng nhỏ ⇔ càng vòng vèo
+
+CHỈ tính trên các episode THÀNH CÔNG (loại bỏ failure)</pre>
+  </div>
+  <ul>
+    <li><b>Thiên lệch sống sót:</b> H1 có 170 failure bị loại. So sánh E của H0 với E của một TẬP CON được chọn lọc của H1 (những episode mà H1 vốn đã làm tốt) là so sánh không cân xứng. Paper nêu rõ điều này.</li>
+    <li><b>Chỉ 18/20 cặp dùng được:</b> hai unit không có episode thành công nào ở một trong hai controller (<code class="mi">map-barrier-01/seed401</code> và <code class="mi">map-random-01/seed307</code>) → không tạo được hiệu ghép cặp.</li>
+    <li><b>Kết quả bất ngờ:</b> E của H1 (0.892) hơi CAO hơn H0 (0.883). Khác biệt không có ý nghĩa (p = 0.417) nhưng đủ để paper từ chối tuyên bố “hybrid bay thẳng hơn”.</li>
+  </ul>
+  <div class="formula">
+    <span class="ftag">CT-29</span><span class="ftitle">Clearance nhỏ nhất (dùng BỀ MẶT, không dùng tâm)</span>
+<pre>clearance = min trên toàn bộ đường bay của  δₜ   (clearance CÓ DẤU tới mặt AABB gần nhất)
+
+δ &gt; 0 : ngoài vật cản      δ = 0 : chạm mặt      δ &lt; 0 : đã xuyên vào trong
+Bán kính phồng UAV = 0
+Khác với dᵢ của APF (đo tới tâm) — xem §6</pre>
+  </div>
+  <h3>10.3 Nhóm chỉ số động học (sai phân hữu hạn)</h3>
+  <div class="formula">
+    <span class="ftag">CT-30, CT-31</span><span class="ftitle">Gia tốc và jitter lấy từ vị trí lấy mẫu</span>
+<pre>vận tốc    ≈ Δp/Δt
+accel index = mean ‖ Δ²p / Δt² ‖     (m/s²)   — đạo hàm bậc 2
+jitter      = mean ‖ Δ³p / Δt³ ‖     (m/s³)   — đạo hàm bậc 3
+Δt = 0.1 s ; lấy trung bình trên các bước của episode
+
+Δ²pₜ = pₜ₊₁ − 2pₜ + pₜ₋₁        Δ³pₜ = pₜ₊₂ − 3pₜ₊₁ + 3pₜ − pₜ₋₁</pre>
+  </div>
+  <div class="callout warn">
+    <div class="ct">Bốn điều các chỉ số này KHÔNG chứng minh được</div>
+    <ul style="margin:6px 0">
+      <li>Không phải khả thi về cơ cấu chấp hành (actuator feasibility) — không có giới hạn tốc độ motor hay rate limit.</li>
+      <li>Không phải công suất motor hay tiêu thụ năng lượng.</li>
+      <li>Không phải độ mượt tư thế (attitude smoothness) — mô hình point-mass không có tư thế.</li>
+      <li>Không phải độ thoải mái hay tải khí động; càng không phải bằng chứng “bay được thật”.</li>
+    </ul>
+    <p>So với chuẩn thực sự trong robotics: Minimum-Snap (Mellinger &amp; Kumar 2011) tối ưu jerk/snap của QUỸ ĐẠO THAM CHIẾU kèm ràng buộc động lực học. Ở đây jerk chỉ là chẩn đoán trên quỹ đạo ĐÃ THỰC THI.</p>
+  </div>
+  <h3>10.4 Nhóm công cụ suy luận</h3>
+  <div class="formula">
+    <span class="ftag">CT-32</span><span class="ftitle">Cỡ hiệu ứng ghép cặp Cohen's d<sub>z</sub></span>
+<pre>Δᵢ = (giá trị của H1 tại unit i) − (giá trị của H0 tại unit i) ,  i = 1..20
+
+d_z = Δ̄ / s_Δ      (hiệu trung bình chia cho độ lệch chuẩn CỦA HIỆU)
+
+Quy ước đọc thô: |d_z| ≈ 0.2 nhỏ · 0.5 trung bình · 0.8 lớn · &gt; 1.5 rất lớn
+
+  success    d_z = −0.509   (trung bình, theo hướng H1 kém hơn)
+  accel      d_z = +1.07    (lớn)
+  jitter     d_z = +1.78    (rất lớn — bằng chứng mạnh nhất của paper)
+  steps      d_z = +0.300   (nhỏ)
+  efficiency d_z = +0.156   (rất nhỏ, n = 18)
+  clearance  d_z = +0.063   (gần như bằng 0)</pre>
+  </div>
+  <ul>
+    <li><b>Wilcoxon signed-rank hai phía</b> trên 20 hiệu ghép cặp: phi tham số, không giả định phân phối chuẩn của hiệu — phù hợp vì steps của H1 có phân phối lệch nặng (SD 451.0).</li>
+    <li><b>d<sub>z</sub> quan trọng hơn p</b> ở đây: với n = 20, p = 0.027 cho success đi kèm d<sub>z</sub> chỉ −0.509 (hiệu trung bình), trong khi jitter có d<sub>z</sub> = 1.78 (hiệu rất lớn). Paper vì thế nhấn mạnh “exact p-values and effect sizes” thay vì dán nhãn significant/không.</li>
+    <li><b>Không hiệu chỉnh đa bội:</b> 6 chỉ số thành phần, các outcome chính không được tiền đặc tả như một họ confirmatory → p-value là KHÁM PHÁ. Với Bonferroni (0.05/6 = 0.0083) thì success (p = 0.027) và accel (p = 0.006, sát ngưỡng) sẽ đổi kết luận; jitter (p &lt; 0.001) vẫn vững. Điểm nên thảo luận với sinh viên.</li>
+  </ul>
+</section>
+
+<section id="s11">
+  <h2><span class="no">§11</span>Kết quả thực nghiệm</h2>
+  <p class="lede">Bảng số liệu chính và biểu đồ. Mọi con số đều tái sinh được từ ledger (69/69 claim đối soát). §V · results/rigorous/canonical/</p>
+  <h3>11.1 Accounting kết quả tổng thể (1000 rollout mỗi cấu hình)</h3>
+  <figure><img src="assets/charts/outcomes_overall.png" alt="Thành phần kết cục của ba cấu hình">
+    <figcaption><b>Hình 11.1 — Accounting đầy đủ.</b> Mỗi rollout đúng một nhãn. Kiểm tra nhất quán: 1000+0+0 · 830+58+112 · 55+905+40 đều bằng 1000.</figcaption></figure>
+  <div class="tblwrap"><table>
+    <caption>Kết quả tổng thể và khoảng tin cậy Wilson</caption>
+    <thead><tr><th>Controller</th><th>Success</th><th>SR (Wilson 95% CI)</th><th>Collision</th><th>Timeout</th><th>Efficiency (mean ± SD, chỉ success)</th></tr></thead>
+    <tbody>
+      <tr><td><b>H0 Hybrid</b></td><td>1000</td><td>1.000 (0.996–1.000)</td><td>0</td><td>0</td><td>0.883 ± 0.075</td></tr>
+      <tr><td><b>H1 A2C-only</b></td><td>830</td><td>0.830 (0.805–0.852)</td><td>58</td><td>112</td><td>0.892 ± 0.099</td></tr>
+      <tr><td><b>H2 APF-only</b></td><td>55</td><td>0.055 (0.042–0.071)</td><td>905</td><td>40</td><td>0.882 ± 0.041</td></tr>
+    </tbody>
+  </table></div>
+  <p>Ở cấp training-run, H1 thấp hơn H0 đúng 17 điểm phần trăm (d<sub>z</sub> = −0.509, Wilcoxon p = 0.0273, n = 20).</p>
+  <figure><img src="assets/charts/success_by_map.png" alt="Tỉ lệ hoàn thành theo map">
+    <figcaption><b>Hình 11.2 — Tỉ lệ hoàn thành theo từng map</b> (250 rollout mỗi ô). H0 đạt 250/250 trên cả bốn map;
+    khoảng cách H0−H1 phụ thuộc mạnh vào layout.</figcaption></figure>
+  <h3>11.2 Cấu trúc thất bại — thông tin quan trọng hơn tỉ lệ thành công</h3>
+  <div class="tblwrap"><table>
+    <caption>H1: thành phần thất bại theo map</caption>
+    <thead><tr><th style="width:110px">Map</th><th>H1 success</th><th>H1 collision</th><th>H1 timeout</th><th>Cơ chế thất bại suy ra</th></tr></thead>
+    <tbody>
+      <tr><td>Random</td><td>140</td><td>48</td><td>62</td><td>Cả hai cơ chế: vừa đâm vừa quẩn</td></tr>
+      <tr><td>Corridor</td><td>240</td><td>10</td><td>0</td><td>Ràng buộc ngang lặp lại → dao động/kém giảm chấn → va chạm</td></tr>
+      <tr><td>Barrier</td><td>200</td><td>0</td><td>50</td><td>Có khe hở hình học → không đủ tiến bộ về đích → hết giờ</td></tr>
+      <tr><td>Mixed</td><td>250</td><td>0</td><td>0</td><td>APF không cần thiết cho layout này</td></tr>
+    </tbody>
+  </table></div>
+  <figure><img src="assets/charts/h1_outcome_stack.png" alt="Thành phần kết cục của H1 theo map">
+    <figcaption><b>Hình 11.3 — Thành phần kết cục của H1.</b> Barrier: 0 va chạm nhưng 50 hết giờ → thiếu tiến bộ, không phải thiếu an toàn.
+    Corridor: 100% failure là va chạm → vấn đề giảm chấn dao động. Cùng một tỉ lệ thành công có thể đến từ hai cơ chế hoàn toàn khác nhau.</figcaption></figure>
+  <div class="callout">
+    <div class="ct">Vì sao phân tách này đáng giá</div>
+    <p>Một can thiệp chỉ giảm va chạm mà không giải quyết được sự trì trệ sẽ KHÔNG cải thiện tỉ lệ hoàn thành ở map barrier — và ngược lại. Nếu chỉ báo cáo “H1 đạt 83%”, thông tin này mất hoàn toàn.</p>
+  </div>
+  <h3>11.3 H2 (chỉ APF) — bảng đầy đủ</h3>
+  <div class="tblwrap"><table>
+    <caption>H2: thành phần kết cục theo map</caption>
+    <thead><tr><th style="width:110px">Map</th><th>Success</th><th>Collision</th><th>Timeout</th></tr></thead>
+    <tbody>
+      <tr><td>Random</td><td>50</td><td>190</td><td>10</td></tr>
+      <tr><td>Corridor</td><td>0</td><td>250</td><td>0</td></tr>
+      <tr><td>Barrier</td><td>5</td><td>225</td><td>20</td></tr>
+      <tr><td>Mixed</td><td>0</td><td>240</td><td>10</td></tr>
+    </tbody>
+  </table></div>
+  <p style="color:var(--muted);font-size:13px">Nguồn: <code class="mi">reproducibility/tables/generated/table_map_outcomes.csv</code> (sinh từ ledger). H2 không bao giờ thành công trên corridor và mixed.</p>
+  <figure><img src="assets/charts/h2_outcome_stack.png" alt="Thành phần kết cục của H2 theo map">
+    <figcaption><b>Hình 11.4 — Thành phần kết cục của H2.</b> Thất bại chủ yếu là va chạm — nhất quán với cơ chế under-repel của APF theo khoảng cách tâm (xem §5).</figcaption></figure>
+  <h3>11.4 Chỉ số liên tục: mean ± SD, kèm median để chống diễn giải sai</h3>
+  <div class="tblwrap"><table>
+    <caption>Chỉ số liên tục theo controller</caption>
+    <thead><tr><th>Controller</th><th>Clearance (m)</th><th>Steps (mean ± SD)</th><th>Steps (median)</th><th>Jitter (m/s³)</th><th>Accel (m/s²)</th></tr></thead>
+    <tbody>
+      <tr><td><b>H0 Hybrid</b></td><td>7.24 ± 5.24</td><td>104.4 ± 22.7</td><td>99</td><td>28.53 ± 9.03</td><td>16.08 ± 1.67</td></tr>
+      <tr><td><b>H1 A2C-only</b></td><td>7.77 ± 6.28</td><td>237.8 ± 451.0</td><td>78</td><td>55.33 ± 14.68</td><td>22.85 ± 7.00</td></tr>
+      <tr><td><b>H2 APF-only</b></td><td>0.76 ± 3.70</td><td>408.0 ± 338.8</td><td>311</td><td>2.21 ± 0.82</td><td>0.45 ± 0.10</td></tr>
+    </tbody>
+  </table></div>
+  <figure><img src="assets/charts/steps_mean_vs_median.png" alt="So sánh mean và median số bước">
+    <figcaption><b>Hình 11.5 — Mean ≠ median.</b> Phân phối steps của H1 là hỗn hợp ba chế độ (thành công ngắn ~78 bước, va chạm sớm,
+    và episode chạy tới trần 1507). Mean bị kéo lên bởi đuôi timeout nên so sánh mean vô điều kiện là vô nghĩa — khác biệt steps không được ủng hộ (p = 0.123).</figcaption></figure>
+  <div class="cards">
+    <div class="card"><h4>Jitter của H2 thấp nhất (2.21) nhưng đây KHÔNG phải tin tốt</h4><p>H2 có accel 0.45 m/s² và jitter 2.21 m/s³ — thấp hơn H0 hàng chục lần, nhưng đi kèm 90.5% va chạm và 4% timeout: UAV gần như không di chuyển được hoặc chết sớm. So sánh độ mượt mà KHÔNG điều kiện trên việc hoàn thành nhiệm vụ sẽ đảo ngược hoàn toàn kết luận thực tiễn.</p></div>
+    <div class="card"><h4>104.4 bước của H0 không phải thời gian bay thật</h4><p>Tương đương 10.44 s thời gian mô phỏng, nhưng point-mass nhận lệnh lực trực tiếp, dải độ cao chỉ 1 m, và không có động lực học tư thế/chấp hành nào ràng buộc cơ động. Không được đọc thành thời gian bay thực tế.</p></div>
+  </div>
+  <h3>11.5 Suy luận ghép cặp H1 − H0 trên 20 đơn vị</h3>
+  <div class="tblwrap"><table>
+    <caption>Kiểm định ghép cặp cho sáu chỉ số thành phần</caption>
+    <thead><tr><th>Chỉ số</th><th>Hiệu trung bình (H1 − H0)</th><th>Cohen's d<sub>z</sub></th><th>Wilcoxon p</th><th>n cặp</th><th>Kết luận của paper</th></tr></thead>
+    <tbody>
+      <tr><td>Tỉ lệ thành công</td><td>−0.17 (−17 điểm %)</td><td>−0.509</td><td>0.0273</td><td>20</td><td><span class="tag ok">có bằng chứng</span> H1 kém tin cậy hơn</td></tr>
+      <tr><td>Jitter (m/s³)</td><td>+26.80</td><td>1.78</td><td>&lt; 0.001</td><td>20</td><td><span class="tag ok">có bằng chứng</span> H1 biến thiên mạnh hơn (hiệu rất lớn)</td></tr>
+      <tr><td>Acceleration (m/s²)</td><td>+6.77</td><td>1.07</td><td>0.006</td><td>20</td><td><span class="tag ok">có bằng chứng</span> H1 gia tốc lấy mẫu lớn hơn</td></tr>
+      <tr><td>Efficiency (chỉ success)</td><td>+0.0142</td><td>0.156</td><td>0.417</td><td>18</td><td><span class="tag mute">không ủng hộ</span></td></tr>
+      <tr><td>Clearance nhỏ nhất (m)</td><td>+0.533</td><td>0.063</td><td>0.956</td><td>20</td><td><span class="tag mute">không ủng hộ</span></td></tr>
+      <tr><td>Số bước (steps)</td><td>+133.37</td><td>0.300</td><td>0.123</td><td>20</td><td><span class="tag mute">không ủng hộ</span> (SD 451 do trộn timeout dài)</td></tr>
+    </tbody>
+  </table></div>
+  <figure><img src="assets/charts/effect_sizes.png" alt="Cỡ hiệu ứng ghép cặp cho sáu chỉ số">
+    <figcaption><b>Hình 11.6 — Cỡ hiệu ứng ghép cặp d<sub>z</sub>.</b> Chỉ ba chỉ số có bằng chứng: success (−0.509), acceleration (+1.07), jitter (+1.78).
+    Ba chỉ số còn lại có d<sub>z</sub> gần 0 và p lớn. Đường nét đứt là mốc |d<sub>z</sub>| = 0.2 / 0.5 / 0.8.</figcaption></figure>
+</section>
+<section id="s12">
+  <h2><span class="no">§12</span>Diễn giải cơ chế: cái gì giải thích được, cái gì chỉ là giả thuyết</h2>
+  <p class="lede">Paper phân biệt rất rõ ba mức: kết quả quan sát, giải thích cơ chế có bằng chứng, và giả thuyết cần đo thêm. §V-D · §VI</p>
+  <div class="tblwrap"><table>
+    <caption>Ba mức bằng chứng cho từng quan sát</caption>
+    <thead><tr><th style="width:250px">Quan sát</th><th style="width:330px">Giải thích đề xuất</th><th>Trạng thái bằng chứng</th></tr></thead>
+    <tbody>
+      <tr><td>H0 jitter thấp hơn H1 rõ rệt (d<sub>z</sub> = 1.78)</td><td>Hỗn hợp lồi với λ tăng dần tới 0.55 ở vùng cuối làm dịu các thay đổi lệnh lớn của A2C khi tiếp cận đích</td><td><span class="tag warn">giả thuyết</span> chưa log tách lệnh A2C/APF nên không chứng minh được cơ chế</td></tr>
+      <tr><td>H2 va chạm 90.5%</td><td>APF kích hoạt theo khoảng cách tới TÂM trong bán kính 6 m nên không phản ứng khi ở gần mặt một khối lớn; cộng thêm local minima kinh điển của trường thế năng</td><td><span class="tag warn">hợp lý về cơ chế</span> nhưng chưa chứng minh bằng force-field ablation riêng</td></tr>
+      <tr><td>H1 thất bại ở barrier toàn bộ là timeout</td><td>Barrier có khe hở hình học nên không phải vấn đề xâm nhập không an toàn, mà là không duy trì đủ tiến bộ về đích</td><td><span class="tag ok">ủng hộ bởi dữ liệu</span> (0 collision, 50 timeout)</td></tr>
+      <tr><td>H1 thất bại ở corridor toàn bộ là va chạm</td><td>Ràng buộc ngang lặp lại phơi bày lệnh dao động hoặc giảm chấn kém, dù hướng đích đơn giản</td><td><span class="tag ok">ủng hộ bởi dữ liệu</span> (10 collision, 0 timeout)</td></tr>
+      <tr><td>H1 có efficiency và clearance mean CAO hơn H0 một chút</td><td>Không phải hybrid kém hơn, mà là thiên lệch sống sót: chỉ so trên tập con H1 đã thành công</td><td><span class="tag info">giải thích phương pháp</span> đã kiểm chứng bằng p = 0.417 và 0.956</td></tr>
+      <tr><td>H0 đạt 100% trên mọi map</td><td>Kênh APF cộng hình học vật cản mang lại độ tin cậy nhất quán trong giao thức đã đánh giá</td><td><span class="tag ok">có bằng chứng</span> trong phạm vi 4 map; không phải bảo đảm an toàn tổng quát</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout">
+    <div class="ct">Lịch λ giải thích điều gì — và dừng ở đâu</div>
+    <p>Tại khoảng cách danh định 335.4 m, λ bị clip xuống sàn 0.15. Khi vào trong 255 m, lịch không bị chặn nữa; tới 135 m nó đạt
+    trần 0.55. Như vậy đóng góp giải tích yếu nhất ở pha đầu và mạnh nhất ở pha cuối. Mặt khác, lực đẩy theo tâm chỉ hoạt động
+    trong 6 m quanh tâm vật cản — nghĩa là phần lớn thời gian hành trình, APF thực chất chỉ là lực hút không đổi 0.04 về phía đích.
+    Hai facts này gợi ý giá trị của APF nằm ở pha tiếp cận và ở các khe hẹp. Muốn khẳng định, cần log riêng
+    <code class="mi">aₜᴬ²ᶜ</code> và <code class="mi">aₜᴬᴾᶠ</code> theo thời gian rồi so sánh biên độ thay đổi lệnh — việc mà paper xếp vào future work.</p>
+  </div>
+  <figure><img src="assets/figures/matched_failure_trajectories.png" alt="Ba quỹ đạo khớp điều kiện trong môi trường barrier">
+    <figcaption><b>Hình 12.1 — Ba quỹ đạo trong cùng một điều kiện</b> (figure gốc của paper): cùng tỉ lệ, cùng điểm xuất phát,
+    đích, map và realization nhiễu. H0 luồn qua khe hở và về đích; H1 vòng dài rồi hết giờ; H2 đâm vào barrier. Dấu gạch chéo đánh dấu trạng thái kết thúc.</figcaption></figure>
+</section>
+
+<section id="s13">
+  <h2><span class="no">§13</span>Threats to validity — bảng đầy đủ 12 mục</h2>
+  <p class="lede">Paper có một mục Threats riêng; bảng này gộp thêm các mục từ reproducibility/docs/limitations.md. §VII</p>
+  <div class="tblwrap"><table>
+    <thead><tr><th style="width:200px">Nhóm</th><th style="width:380px">Mối đe dọa cụ thể</th><th>Cách paper xử lý / hệ quả diễn giải</th></tr></thead>
+    <tbody>
+      <tr><td>Internal — quy kết nguyên nhân</td><td>H0 nhận hình học vật cản qua APF, observation của A2C thì không → H0−H1 đo cả kênh APF LẪN đầu vào thông tin đặc quyền</td><td>Không kết luận “APF tính toán tốt hơn”; cần H1b có obstacle feature tương xứng</td></tr>
+      <tr><td>Internal — cơ chế</td><td>Không log tách lệnh aᴬ²ᶜ và aᴬᴾ nên không chứng minh được vì sao jitter giảm</td><td>Giải thích theo lịch λ chỉ là giả thuyết chẩn đoán</td></tr>
+      <tr><td>Measurement — độ đo</td><td>Accel/jerk là sai phân hữu hạn của vị trí lấy mẫu, không phải tải khí động, công suất motor, độ mượt tư thế hay comfort</td><td>Không suy ra “bay được thật” (flyability)</td></tr>
+      <tr><td>Measurement — khoảng cách</td><td>APF dùng khoảng cách tới TÂM AABB; reward và clearance dùng khoảng cách BỀ MẶT có dấu</td><td>Hai đại lượng khác nhau, không hoán đổi; APF under-repel với khối rộng</td></tr>
+      <tr><td>Measurement — code chết</td><td>Độ cao bị clamp về [5, 6] trước khi tính reward → số hạng phạt r_z không bao giờ kích hoạt</td><td>Khai báo rõ thay vì âm thầm bỏ</td></tr>
+      <tr><td>Statistical — n</td><td>n = 20 cặp (18 với efficiency); 6 kiểm định không hiệu chỉnh đa bội</td><td>p-value là khám phá; nhấn mạnh p chính xác + cỡ hiệu ứng</td></tr>
+      <tr><td>Statistical — pseudoreplication</td><td>50 slot đánh giá/unit chỉ có 32 numerical seed phân biệt → 18 slot lặp y hệt (1080 instance trùng đã kiểm chứng)</td><td>Tỉ lệ vẫn báo cáo trên 50 slot; rollout KHÔNG được coi là đơn vị độc lập</td></tr>
+      <tr><td>Statistical — survivorship</td><td>Efficiency và clearance chỉ tính trên episode thành công → loại bỏ 170 failure của H1</td><td>Không so sánh “đường bay đẹp hơn” giữa H0 và tập con được chọn lọc của H1</td></tr>
+      <tr><td>Reproducibility</td><td>PyTorch không được seed tường minh, không có cờ determinism → huấn luyện lại không bitwise</td><td>Tái lập từ ledger là chính xác; retrain chỉ “so sánh được về phân phối”</td></tr>
+      <tr><td>External</td><td>4 map AABB 300 m cố định, một quá trình gió duy nhất, không có điều kiện no-wind hay mức gió khác, không held-out map</td><td>Không kết luận robustness theo gió; không tổng quát hóa layout</td></tr>
+      <tr><td>External — mô hình</td><td>Point-mass, không tư thế/rotor/tốc độ cơ cấu chấp hành; dải độ cao chỉ 1 m; trạng thái quan sát sạch</td><td>Lệnh lực có thể đổi nhanh hơn nhiều so với multirotor thật</td></tr>
+      <tr><td>Scope</td><td>Chỉ có bằng chứng cho H0/H1 (A2C) và H2 (không học); H3 (no-wind), H5 (strong-wind), map-random-02 đã định nghĩa nhưng loại khỏi tập bằng chứng</td><td>Không xếp hạng với PPO, SAC, RRT</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s14">
+  <h2><span class="no">§14</span>Kết luận của paper và hướng tương lai</h2>
+  <p class="lede">Đúng ba câu kết luận mà dữ liệu ủng hộ. §VIII</p>
+  <ul>
+    <li>H0 hoàn thành toàn bộ 1000 rollout, so với 830 của cấu hình chỉ A2C khớp ngân sách–giao thức và 55 của điều khiển chỉ APF.</li>
+    <li>Phân tích ghép cặp theo đơn vị (map × training run) ủng hộ độ tin cậy hoàn thành CAO HƠN và biến thiên quỹ đạo lấy mẫu THẤP HƠN, nhưng KHÔNG ủng hộ khác biệt về hiệu suất đường bay thành công, clearance hay độ dài episode.</li>
+    <li>Kết quả phản ánh kênh “APF + hình học vật cản” đã đánh giá, KHÔNG phải một thuật toán học mới hay một planner vượt trội nói chung.</li>
+  </ul>
+  <div class="tblwrap"><table>
+    <caption>Sáu hướng tương lai theo paper</caption>
+    <thead><tr><th style="width:30px">#</th><th style="width:290px">Hướng tương lai</th><th>Vấn đề nó giải quyết</th><th style="width:190px">Chi phí ước tính</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Đánh giá trên map held-out</td><td>External validity: hiện chỉ có 4 map cố định</td><td>Thấp — chỉ cần chạy eval, không retrain</td></tr>
+      <tr><td>2</td><td>Cho policy quan sát vật cản tương xứng (H1b)</td><td>Bất đối xứng thông tin — giới hạn chi phối toàn bài</td><td>Trung bình — retrain, đổi observation space</td></tr>
+      <tr><td>3</td><td>APF dùng khoảng cách bề mặt thay vì tâm</td><td>Lỗi under-repel giải thích cho H2 và có thể cải thiện H0</td><td>Trung bình — sửa apf_action, retrain</td></tr>
+      <tr><td>4</td><td>Nhiều mức gió (kể cả no-wind = H3 đã định nghĩa)</td><td>Tiêu đề nói “Wind-Perturbed” nhưng chưa có can thiệp mức gió</td><td>Thấp–trung bình — H3/H5 đã có trong manifest</td></tr>
+      <tr><td>5</td><td>Log tách lệnh A2C và APF</td><td>Chứng minh cơ chế giảm jitter thay vì chỉ giả thuyết</td><td>Rất thấp — thêm instrumentation khi eval</td></tr>
+      <tr><td>6</td><td>Mô hình fidelity cao hơn hoặc hardware-in-the-loop</td><td>Khoảng cách point-mass → multirotor thật (tư thế, rotor, rate limit)</td><td>Cao</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s15">
+  <h2><span class="no">§15</span>Reproducibility &amp; audit trail — phần đáng học nhất của dự án</h2>
+  <p class="lede">Gói reproducibility/ là điểm khác biệt thực sự so với mặt bằng paper hội nghị: mọi con số đều tái sinh từ một ledger có checksum.</p>
+  <div class="stats" style="margin:0 0 18px">
+    <div class="stat ok"><div class="v">182/182</div><div class="l">artifact thô xác thực SHA-256 (+65 file release)</div></div>
+    <div class="stat ok"><div class="v">69/69</div><div class="l">claim đối soát · 29 exact · 40 rounding · 0 mismatch</div></div>
+    <div class="stat ok"><div class="v">25/25</div><div class="l">test unit + gate, kèm smoke test môi trường sạch</div></div>
+    <div class="stat warn"><div class="v">CONDITIONAL</div><div class="l">quyết định release — xem lý do bên dưới</div></div>
+  </div>
+  <figure class="diagram"><img src="assets/diagrams/repro_pipeline.svg" alt="Pipeline tái lập kết quả">
+    <figcaption><b>Hình 15.1 — Pipeline tái lập.</b> Từ ledger đã khóa checksum tới từng con số trong paper, qua bốn gate kiểm tra.
+    Chạy <code class="mi">make analysis</code>: dưới 30 giây, không GPU, độc lập máy.</figcaption></figure>
+  <div class="tblwrap"><table>
+    <caption>Mười gate kiểm tra của gói release</caption>
+    <thead><tr><th style="width:330px">Gate kiểm tra</th><th style="width:150px">Kết quả</th><th>Ý nghĩa</th></tr></thead>
+    <tbody>
+      <tr><td>Artifact thô xác thực bằng SHA-256</td><td><span class="tag ok">PASS</span> 182/182</td><td>Không file kết quả nào bị thay đổi âm thầm</td></tr>
+      <tr><td>Mỗi dòng ledger đúng một trạng thái kết thúc</td><td><span class="tag ok">PASS</span> 0 vi phạm</td><td>Accounting đầy đủ, không rollout nào “mất tích”</td></tr>
+      <tr><td>Số rollout mỗi controller = 1000</td><td><span class="tag ok">PASS</span></td><td>Đúng cardinality thiết kế</td></tr>
+      <tr><td>Mỗi ô controller × map = 250</td><td><span class="tag ok">PASS</span></td><td>Thiết kế cân bằng, không ô nào thiếu dữ liệu</td></tr>
+      <tr><td>Unit ghép cặp H0/H1 chia sẻ map + training-run ID</td><td><span class="tag ok">PASS</span> 20 cặp thật</td><td>Ghép cặp hợp lệ, không phải ghép nhãn trùng</td></tr>
+      <tr><td>Bảng/biểu đồ sinh ra TỪ ledger</td><td><span class="tag ok">PASS</span> (analysis/04)</td><td>Không có số liệu gõ tay vào bảng</td></tr>
+      <tr><td>Mọi claim số học EXACT/ROUNDING/SUPPORTED</td><td><span class="tag ok">PASS</span></td><td>Paper khớp dữ liệu tới 2 chữ số thập phân</td></tr>
+      <tr><td>Không có MISMATCH / UNREPRODUCIBLE</td><td><span class="tag ok">PASS</span></td><td>Không có con số nào không tái sinh được</td></tr>
+      <tr><td>Smoke test trong môi trường sạch</td><td><span class="tag ok">PASS</span></td><td>Cài đặt được từ đầu bằng Dockerfile/environment.yml</td></tr>
+      <tr><td>Không có secret/key/credential trong release</td><td><span class="tag ok">PASS</span></td><td>An toàn để công khai</td></tr>
+    </tbody>
+  </table></div>
+  <details>
+    <summary>Vì sao là CONDITIONAL PASS chứ không phải PASS</summary>
+    <ul>
+      <li><b>Lý do (a):</b> 40 checkpoint và 4000 file quỹ đạo <code class="mi">.npz</code> không được phân phối trong gói (quá lớn). Người tái lập phải lấy từ research repo và đối chiếu <code class="mi">checkpoint_sha256</code>. Chúng chỉ cần cho việc đánh giá lại và vẽ hình minh họa — KHÔNG cần để tái sinh bất kỳ con số nào trong paper.</li>
+      <li><b>Lý do (b):</b> huấn luyện lại từ đầu không tái lập bitwise (PyTorch không seed tường minh, không có cờ determinism). Đây là lựa chọn có ý thức và đã khai báo.</li>
+      <li><b>Điều không bị ảnh hưởng:</b> tái lập phân tích từ <code class="mi">data/raw/rollout_ledger.csv</code> là CHÍNH XÁC và độc lập máy, chạy dưới 30 s với ~1 GB RAM, không cần GPU. Đánh giá lại từ checkpoint đã lưu là tất định (dung sai ≤ 1e−6 cho chỉ số liên tục).</li>
+    </ul>
+  </details>
+  <details>
+    <summary>Traceability: 21 tuyên bố trong paper đã được đối chiếu với code (trích 10 mục tiêu biểu)</summary>
+    <div class="tblwrap"><table>
+      <thead><tr><th style="width:34px">#</th><th style="width:290px">Tuyên bố trong paper</th><th>Bằng chứng code</th><th style="width:190px">Kết luận</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Observation đúng 12 chiều</td><td><code class="mi">DroneEnv3D._obs = hstack(state[6], goal-disp[3], wind[3])</code>; <code class="mi">observation_space = Box((12,))</code></td><td><span class="tag ok">CONFIRMED</span></td></tr>
+        <tr><td>2</td><td>A2C không thấy hình học/khoảng cách vật cản</td><td><code class="mi">_obs</code> chỉ có pos, vel, goal-displacement, wind</td><td><span class="tag ok">CONFIRMED</span></td></tr>
+        <tr><td>6</td><td>Clip theo từng thành phần, 12 N mỗi trục</td><td><code class="mi">np.clip(action, −1, 1) * self.max_f</code> với <code class="mi">max_f = 12.0</code></td><td><span class="tag ok">CONFIRMED</span></td></tr>
+        <tr><td>8</td><td>Drag tác dụng lên vận tốc tương đối</td><td><code class="mi">acceleration = (force − kd*(velocity − wind))/mass</code></td><td><span class="tag ok">CONFIRMED</span></td></tr>
+        <tr><td>9</td><td>Euler bán ẩn</td><td><code class="mi">velocity += a*dt</code> rồi <code class="mi">x += vx*dt</code> dùng vận tốc MỚI</td><td><span class="tag ok">CONFIRMED</span></td></tr>
+        <tr><td>11</td><td>Va chạm quét đoạn (swept)</td><td><code class="mi">swept_aabb_collision(previous_pos, pos, o, radius)</code> — phép thử slab 3 trục</td><td><span class="tag ok">CONFIRMED</span></td></tr>
+        <tr><td>14</td><td>Lực đẩy APF dùng khoảng cách tới TÂM AABB</td><td><code class="mi">center = (...)/2 ; d = norm(pos − center)</code></td><td><span class="tag warn">CONFIRMED</span> bất đối xứng với #13</td></tr>
+        <tr><td>17</td><td>Lịch blend tại 335.4 / 255 / 135 / 0 m</td><td><code class="mi">λ = clip(1 − d/300, 0.15, 0.55)</code> → 0.15, 0.15, 0.55, 0.55</td><td><span class="tag ok">CONFIRMED</span></td></tr>
+        <tr><td>19</td><td>Phạt độ cao bất hoạt sau clamp</td><td>z bị clamp về [5,6] trước khi reward đọc <code class="mi">st[2]</code> → cả hai nhánh phạt không tới được</td><td><span class="tag warn">CONFIRMED INACTIVE</span></td></tr>
+        <tr><td>20</td><td>Công thức chân trời và giá trị danh định</td><td><code class="mi">max_steps = int((D_xy/(5.0·dt))·1.8) + 300</code>; D_xy = 335.41 → H = 1507</td><td><span class="tag ok">CONFIRMED</span></td></tr>
+      </tbody>
+    </table></div>
+    <p style="color:var(--muted);font-size:13px">Bảng đầy đủ 21 mục: <code class="mi">reproducibility/docs/implementation_traceability.md</code>.
+    Kiểm tra tự động: <code class="mi">tests/test_controller_semantics.py</code>, <code class="mi">test_dynamics_and_collision.py</code>, <code class="mi">test_reward_and_horizon.py</code>.</p>
+  </details>
+  <div class="callout warn">
+    <div class="ct">Cảnh báo tài liệu lỗi thời trong repo nghiên cứu (quan trọng khi cho sinh viên tự đọc code)</div>
+    <ul style="margin:6px 0">
+      <li><code class="mi">README.md</code> ở gốc repo nghiên cứu mô tả MÔ HÌNH CŨ: quãng đường 700 m, segment curriculum, state 6 chiều, gió cộng trực tiếp vào gia tốc, ngưỡng đến đích 2.0 m. Paper canonical dùng 300 m, observation 12 chiều, gió trong drag tương đối, ngưỡng 3 m. KHÔNG dùng README gốc để đối chiếu công thức.</li>
+      <li><code class="mi">README_PAPER_FINAL.md</code> và <code class="mi">results/rigorous/canonical/qa_status.json</code> vẫn ghi “results pending / chưa có kết quả 5.000.000 bước” — đã lỗi thời, vì 80 thư mục <code class="mi">steps5000000</code> đã hoàn tất và <code class="mi">job_full.json</code> báo <code class="mi">complete</code>.</li>
+      <li>Các bản build cũ với tiêu đề khác (<code class="mi">FirstSubmission/</code>, <code class="mi">final_build/</code> “Auditable…”, <code class="mi">self_review_build/</code>, <code class="mi">TestFolder/</code>) đã bị supersede — chỉ đọc để xem lịch sử, không trích dẫn.</li>
+    </ul>
+  </div>
+  <details>
+    <summary>Mã nguồn Mermaid của hai sơ đồ (để chỉnh sửa trong mermaid.live hoặc trình soạn thảo)</summary>
+    <pre class="mermaid">flowchart TD
+  subgraph CFG["Configuration"]
+    H0["H0 Hybrid (A2C+APF)"]
+    H1["H1 chỉ A2C"]
+    H2["H2 chỉ APF"]
+  end
+  CFG --> MAP["4 map 300m: random / corridor / barrier / mixed"]
+  MAP --> RUN["5 training run độc lập mỗi map (seed 101..503, 5M bước)"]
+  RUN --> SLOT["50 eval seed slot mỗi unit (base+episode)"]
+  SLOT --> ROLL["1 rollout tất định"]
+  SLOT -. "chỉ 32 seed phân biệt" .-> DUP["18 slot lặp y hệt = pseudoreplication"]
+  RUN ==> INF["ĐƠN VỊ SUY LUẬN: 20 cặp (map x training run)"]</pre>
+    <pre class="mermaid">flowchart LR
+  A["episode_audit.csv (3000 rollout)"] --> B["rollout_ledger.csv (SHA-256 khóa)"]
+  B --> C["01_build_unit_summaries"]
+  C --> D["02_compute_statistics"]
+  D --> E["03_reconcile_manuscript_claims (69 claim)"]
+  E --> F["04_generate_tables_and_figures"]
+  G["Gate: checksum 182/182"] -.-> B
+  H["Gate: accounting 1 nhãn/dòng"] -.-> A
+  I["Gate: pairing 20 cặp thật"] -.-> D
+  J["Gate: 0 MISMATCH"] -.-> E
+  F --> K["bảng + biểu đồ trong paper"]</pre>
+  </details>
+</section>
+
+<section id="s16">
+  <h2><span class="no">§16</span>Thuật ngữ, câu hỏi ôn tập và bài học phương pháp luận</h2>
+  <p class="lede">Ba khối phụ lục dùng cho giảng dạy: glossary tra cứu nhanh, 18 câu hỏi theo ba mức, và bảng bài học nên học theo / nên tránh.</p>
+  <details>
+    <summary>Glossary Anh–Việt (17 thuật ngữ)</summary>
+    <div class="tblwrap"><table>
+      <thead><tr><th style="width:250px">Thuật ngữ</th><th style="width:230px">Tiếng Việt / viết tắt</th><th>Định nghĩa dùng trong paper</th></tr></thead>
+      <tbody>
+        <tr><td>Advantage Actor–Critic (A2C)</td><td>A2C</td><td>Biến thể actor–critic đồng bộ của A3C: dùng advantage Â = Q − V để giảm phương sai gradient chính sách</td></tr>
+        <tr><td>Artificial Potential Field</td><td>APF / trường thế năng nhân tạo</td><td>Điều khiển phản xạ: lực hút về đích + lực đẩy quanh vật cản, tính online, chi phí thấp</td></tr>
+        <tr><td>Axis-Aligned Bounding Box</td><td>AABB</td><td>Hộp bao chữ nhật có các cạnh song song trục tọa độ — biểu diễn vật cản trong mô phỏng</td></tr>
+        <tr><td>Component evaluation</td><td>Đánh giá theo thành phần</td><td>Đo đóng góp của MỘT thành phần trong một implementation cố định, thay vì đề xuất hệ thống mới</td></tr>
+        <tr><td>Deterministic rollout</td><td>Lượt chạy tất định</td><td>Đánh giá dùng model.predict(deterministic=True) — lấy mode của phân phối thay vì lấy mẫu</td></tr>
+        <tr><td>Finite difference</td><td>Sai phân hữu hạn</td><td>Xấp xỉ đạo hàm bằng hiệu các mẫu liền kề: Δp/Δt, Δ²p/Δt², Δ³p/Δt³</td></tr>
+        <tr><td>Information asymmetry</td><td>Bất đối xứng thông tin</td><td>Hai cấu hình so sánh không nhận cùng một đầu vào (ở đây: hình học vật cản)</td></tr>
+        <tr><td>Jitter</td><td>Chỉ số biến thiên bậc 3</td><td>mean‖Δ³p/Δt³‖ (m/s³) — độ “gằn” của quỹ đạo lấy mẫu</td></tr>
+        <tr><td>Matched pair</td><td>Cặp ghép</td><td>Hai đơn vị chia sẻ map, ngân sách huấn luyện và realization đánh giá → so sánh ghép cặp</td></tr>
+        <tr><td>Pseudoreplication</td><td>Lặp giả</td><td>Đếm nhiều lần quan sát không độc lập như thể chúng độc lập, làm phồng n và thu nhỏ p</td></tr>
+        <tr><td>Slab test</td><td>Phép thử lát cắt</td><td>Giao đoạn thẳng với AABB bằng cách cắt 3 dải trục — phát hiện va chạm kể cả khi bước nhảy dài</td></tr>
+        <tr><td>Stationary variance</td><td>Phương sai dừng</td><td>Phương sai không đổi theo thời gian của quá trình AR(1) khi hệ số nhiễu được chuẩn đúng</td></tr>
+        <tr><td>Success rate (SR)</td><td>Tỉ lệ hoàn thành</td><td>Số episode về đích (cách đích &lt; 3 m và không va chạm) / tổng số episode</td></tr>
+        <tr><td>Swept collision</td><td>Va chạm quét</td><td>Kiểm tra cả đoạn pₜ → pₜ₊₁ thay vì chỉ điểm cuối, chống hiện tượng “xuyên hầm” vật cản</td></tr>
+        <tr><td>Wilson score interval</td><td>Khoảng tin cậy Wilson</td><td>Khoảng tin cậy cho tỉ lệ nhị phân, bền khi p gần 0/1 hoặc n nhỏ — dùng làm mô tả, không dùng để suy luận</td></tr>
+        <tr><td>Wilcoxon signed-rank</td><td>Kiểm định hạng có dấu</td><td>Kiểm định phi tham số cho hiệu ghép cặp, không giả định phân phối chuẩn</td></tr>
+        <tr><td>Cohen's d<sub>z</sub></td><td>Cỡ hiệu ứng ghép cặp</td><td>Δ̄/s_Δ: hiệu trung bình chia cho độ lệch chuẩn của hiệu — cho biết độ LỚN, không chỉ độ hiếm</td></tr>
+      </tbody>
+    </table></div>
+  </details>
+  <details open>
+    <summary>18 câu hỏi ôn tập cho sinh viên (ba mức)</summary>
+    <p style="color:var(--muted);font-size:13px">Mức 1 kiểm tra đọc hiểu công thức. Mức 2 yêu cầu tính toán hoặc suy luận từ thiết kế. Mức 3 là câu hỏi phản biện kiểu reviewer — nên dùng cho buổi seminar.</p>
+    <div class="tblwrap"><table>
+      <thead><tr><th style="width:130px">Mức</th><th>Câu hỏi</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag ok">1 — Hiểu</span></td><td>Observation của A2C gồm những khối 3 chiều nào? Vì sao dùng (g − pₜ) thay vì g?</td></tr>
+        <tr><td><span class="tag ok">1 — Hiểu</span></td><td>Hành động của policy là gia tốc hay lực? Giới hạn 12 N áp dụng theo trục hay theo chuẩn vector?</td></tr>
+        <tr><td><span class="tag ok">1 — Hiểu</span></td><td>Viết lại công thức tính gia tốc và giải thích vì sao gió xuất hiện trong số hạng drag chứ không phải cộng thẳng vào vị trí.</td></tr>
+        <tr><td><span class="tag ok">1 — Hiểu</span></td><td>Tính H cho map 300 m và cho biết một episode kéo dài bao nhiêu giây mô phỏng khi dùng hết chân trời.</td></tr>
+        <tr><td><span class="tag ok">1 — Hiểu</span></td><td>λₜ bằng bao nhiêu khi UAV cách đích 335.4 m, 255 m, 180 m và 135 m? Ý nghĩa điều khiển của lịch này?</td></tr>
+        <tr><td><span class="tag warn">2 — Vận dụng</span></td><td>Một khối AABB cạnh 20 m có tâm cách UAV 12 m. Tính lực đẩy APF và giải thích vì sao kết quả này nguy hiểm.</td></tr>
+        <tr><td><span class="tag warn">2 — Vận dụng</span></td><td>Chứng minh rằng với hệ số 1.2·√(1−φ²) thì phương sai dừng của quá trình gió giật bằng 1.2².</td></tr>
+        <tr><td><span class="tag warn">2 — Vận dụng</span></td><td>Vì sao số hạng phạt độ cao r_z không bao giờ kích hoạt? Muốn nó hoạt động thì phải đổi gì trong thứ tự tính toán?</td></tr>
+        <tr><td><span class="tag warn">2 — Vận dụng</span></td><td>Vì sao efficiency chỉ có 18 cặp ghép thay vì 20? Điều này tạo ra thiên lệch gì?</td></tr>
+        <tr><td><span class="tag warn">2 — Vận dụng</span></td><td>Jitter của H2 (2.21 m/s³) thấp hơn H0 (28.53 m/s³). Vì sao KHÔNG được kết luận H2 bay mượt hơn?</td></tr>
+        <tr><td><span class="tag warn">2 — Vận dụng</span></td><td>Mean steps của H1 là 237.8 còn median là 78. Giải thích khoảng cách này bằng cấu trúc kết quả.</td></tr>
+        <tr><td><span class="tag bad">3 — Phản biện</span></td><td>H0 thắng H1 có chứng minh được “APF tốt hơn học thuần túy” không? Chỉ ra đúng một thí nghiệm bổ sung sẽ trả lời được câu hỏi đó.</td></tr>
+        <tr><td><span class="tag bad">3 — Phản biện</span></td><td>Vì sao paper không hiệu chỉnh đa bội cho 6 kiểm định? Lập luận bảo vệ và lập luận phản đối cách làm này.</td></tr>
+        <tr><td><span class="tag bad">3 — Phản biện</span></td><td>Tiêu đề có “Wind-Perturbed” nhưng không có điều kiện no-wind. Nếu bạn là reviewer, bạn sẽ yêu cầu gì?</td></tr>
+        <tr><td><span class="tag bad">3 — Phản biện</span></td><td>H2 thua thảm hại (905/1000 va chạm). Điều này nói lên giới hạn của APF hay giới hạn của CÀI ĐẶT APF? Phân biệt hai khả năng.</td></tr>
+        <tr><td><span class="tag bad">3 — Phản biện</span></td><td>50 slot đánh giá chỉ có 32 seed phân biệt. Nếu sửa giao thức, bạn chọn 5 base seed cách nhau bao nhiêu để loại trùng lặp mà vẫn giữ 50 slot?</td></tr>
+        <tr><td><span class="tag bad">3 — Phản biện</span></td><td>Vì sao H4 (spline) được giữ lại trong paper dù nó gần như không tạo bằng chứng? Giá trị khoa học của việc công bố một kết quả “no-op” là gì?</td></tr>
+        <tr><td><span class="tag bad">3 — Phản biện</span></td><td>Xếp 4 cấu hình H0, H1, H2 và một PPO giả định theo độ tin cậy của bằng chứng hiện có. Giải thích vì sao PPO không được xếp hạng.</td></tr>
+      </tbody>
+    </table></div>
+  </details>
+  <details>
+    <summary>Bài học phương pháp luận: nên học theo gì, nên tránh gì</summary>
+    <div class="tblwrap"><table>
+      <thead><tr><th style="width:120px">Loại</th><th style="width:330px">Thực hành</th><th>Vì sao quan trọng</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag ok">Học theo</span></td><td>Khai báo bất đối xứng thông tin ngay trong abstract</td><td>Biến điểm yếu thành phạm vi diễn giải rõ ràng → reviewer khó bắt bẻ quá mức</td></tr>
+        <tr><td><span class="tag ok">Học theo</span></td><td>Báo cáo cả kết quả KHÔNG có ý nghĩa (efficiency, clearance, steps)</td><td>Chống thiên lệch công bố; tăng độ tin cậy của các kết quả có ý nghĩa</td></tr>
+        <tr><td><span class="tag ok">Học theo</span></td><td>Chọn đúng đơn vị suy luận (20 cặp) thay vì 1000 rollout</td><td>Tránh pseudoreplication — lỗi phổ biến nhất trong paper RL ứng dụng</td></tr>
+        <tr><td><span class="tag ok">Học theo</span></td><td>Accounting đầy đủ: mỗi episode đúng một trạng thái, collision ưu tiên trước success</td><td>Không có rollout nào “mất tích” khỏi mẫu số</td></tr>
+        <tr><td><span class="tag ok">Học theo</span></td><td>Tách bạch mô tả (Wilson CI) và suy luận (Wilcoxon ghép cặp)</td><td>Khoảng tin cậy không bị hiểu nhầm thành kiểm định</td></tr>
+        <tr><td><span class="tag ok">Học theo</span></td><td>Công bố số hiệu ứng d<sub>z</sub> kèm p</td><td>Người đọc đánh giá được độ lớn, không chỉ độ hiếm</td></tr>
+        <tr><td><span class="tag ok">Học theo</span></td><td>Đối soát từng con số trong paper với ledger (69 claim)</td><td>Chuẩn FAIR: mọi số đều tái sinh được, không copy</td></tr>
+        <tr><td><span class="tag ok">Học theo</span></td><td>Tự chỉ ra code chết (r_z) và no-op (H4)</td><td>Trung thực implementation-level — đúng tinh thần Henderson 2018</td></tr>
+        <tr><td><span class="tag bad">Tránh</span></td><td>Để tài liệu trạng thái cũ mâu thuẫn với kết quả mới</td><td>Người đọc/reviewer vào repo sẽ mất niềm tin trước khi đọc paper</td></tr>
+        <tr><td><span class="tag bad">Tránh</span></td><td>APF dùng khoảng cách tới tâm nhưng mô tả như thể là clearance bề mặt</td><td>Hai đại lượng khác nhau; nhầm lẫn này làm sai lệch diễn giải H2</td></tr>
+        <tr><td><span class="tag bad">Tránh</span></td><td>Không seed tường minh PyTorch</td><td>Mất khả năng tái lập bitwise khi huấn luyện lại</td></tr>
+        <tr><td><span class="tag bad">Tránh</span></td><td>Thiết kế slot seed chồng lấn (50 → 32 seed thật)</td><td>Phồng mẫu số, phải khai báo pseudoreplication</td></tr>
+        <tr><td><span class="tag bad">Tránh</span></td><td>Giữ nhiều bản build/tiêu đề phân kỳ trong cùng một cây thư mục</td><td>Rủi ro nộp nhầm bản đã supersede</td></tr>
+        <tr><td><span class="tag bad">Tránh</span></td><td>Nói “quỹ đạo mượt hơn” mà chỉ đo sai phân vị trí</td><td>Cần command trace hoặc mô hình chấp hành để nói về độ mượt thực sự</td></tr>
+      </tbody>
+    </table></div>
+  </details>
+  <details>
+    <summary>Tài liệu tham khảo của paper (20 nguồn)</summary>
+    <ol style="font-size:13.5px">
+      <li>Khatib, O. (1986). Real-Time Obstacle Avoidance for Manipulators and Mobile Robots. <i>IJRR</i> 5(1):90–98. — nguồn gốc APF.</li>
+      <li>LaValle, S. M. (1998). Rapidly-Exploring Random Trees: A New Tool for Path Planning. Iowa State Univ. TR.</li>
+      <li>Karaman, S. &amp; Frazzoli, E. (2011). Sampling-Based Algorithms for Optimal Motion Planning. <i>IJRR</i> 30(7):846–894.</li>
+      <li>Mnih, V. và cs. (2016). Asynchronous Methods for Deep Reinforcement Learning (A3C). <i>ICML</i> 1928–1937.</li>
+      <li>Schulman, J. và cs. (2017). Proximal Policy Optimization Algorithms. arXiv:1707.06347.</li>
+      <li>Haarnoja, T. và cs. (2018). Soft Actor-Critic. <i>ICML</i> 1861–1870.</li>
+      <li>Henderson, P. và cs. (2018). Deep Reinforcement Learning That Matters. <i>AAAI</i> 32(1). — lý do nhấn mạnh implementation alignment.</li>
+      <li>Lillicrap, T. P. và cs. (2016). Continuous Control with Deep Reinforcement Learning (DDPG). <i>ICLR</i>.</li>
+      <li>Dulac-Arnold, G. và cs. (2021). Challenges of Real-World Reinforcement Learning. <i>Machine Learning</i> 110:2419–2468.</li>
+      <li>Tobin, J. và cs. (2017). Domain Randomization for Transferring DNNs to the Real World. <i>IROS</i> 23–30.</li>
+      <li>Mellinger, D. &amp; Kumar, V. (2011). Minimum Snap Trajectory Generation and Control for Quadrotors. <i>ICRA</i> 2520–2525. — chuẩn “độ mượt” thực sự.</li>
+      <li>O'Connell, M. và cs. (2022). Neural-Fly Enables Rapid Learning for Agile Flight in Strong Winds. <i>Science Robotics</i> 7(66).</li>
+      <li>Shi, G. và cs. (2021). Learning Disturbance-Aware Trajectory Tracking for Quadrotors. <i>IEEE RA-L</i> 6(2):2739–2746.</li>
+      <li>Ma, Q. và cs. (2024). DRL-Based Wind Disturbance Rejection Control Strategy for UAV. <i>Drones</i> 8(11):632.</li>
+      <li>Zheng, L. và cs. (2025). UAV Path Planning in Complex Urban Environments: Review. <i>Sensors</i> 25(13):4142.</li>
+      <li>Li, X. và cs. (2024). G-APF: RRT-Guided Artificial Potential Field Path Planning for UAVs. <i>Drones</i>.</li>
+      <li>Wilson, E. B. (1927). Probable Inference, the Law of Succession, and Statistical Inference. <i>JASA</i> 22(158):209–212. — khoảng tin cậy Wilson.</li>
+      <li>Jin, F. và cs. (2025). A New Hybrid RL with APF Method for UAV Target Search. <i>Sensors</i> 25(9):2796.</li>
+      <li>Xiao, B. và cs. (2025). Addressing Local Minima in Path Planning for Drones with RL-Based Vortex APF. <i>Machines</i> 13(7):600.</li>
+      <li>Lee, H. và cs. (2025). Synergistic Multi-UAV Path and Surveillance Planning Using APF-Enhanced PPO. <i>AIAA SciTech</i>.</li>
+    </ol>
+  </details>
+  <details>
+    <summary>Tệp nguồn trong repo này</summary>
+    <div class="tblwrap"><table>
+      <thead><tr><th style="width:330px">Đường dẫn</th><th>Nội dung</th></tr></thead>
+      <tbody>
+        <tr><td><code class="mi">paper/latex/vnict_hybrid_main.tex</code></td><td>Nguồn LaTeX canonical của paper (IEEEtran conference, 300 dòng)</td></tr>
+        <tr><td><code class="mi">paper/pdf/Component-Evaluation-of-Hybrid-A2C-APF.pdf</code></td><td>PDF đã build, 7 trang (giới hạn 8 trang), metadata Title khớp tiêu đề</td></tr>
+        <tr><td><code class="mi">paper/latex/figures/</code></td><td>5 figure gốc dạng PDF + PNG + SVG dùng cho trang này</td></tr>
+        <tr><td><code class="mi">reproducibility/</code></td><td>Gói tái lập: ledger + SHA-256, analysis 01→04, docs, reports, tests, Dockerfile, CITATION.cff</td></tr>
+        <tr><td><code class="mi">reproducibility/tables/generated/</code></td><td>5 bảng số liệu sinh từ ledger — nguồn của MỌI biểu đồ trong trang này</td></tr>
+        <tr><td><code class="mi">site/tools/build_assets.py</code></td><td>Script sinh toàn bộ biểu đồ (matplotlib) và sơ đồ (SVG) — chạy lại bằng <code class="mi">python site/tools/build_assets.py</code></td></tr>
+        <tr><td><code class="mi">teaching/canvas/*.canvas.tsx</code></td><td>Bản Canvas tương tác của cùng nội dung (mở trong Qoder IDE)</td></tr>
+      </tbody>
+    </table></div>
+  </details>
+</section>
+
+<footer>
+  <p>Biên soạn từ bản LaTeX canonical ngày 2026-09-23. Mọi số liệu đối chiếu với
+  <code class="mi">reproducibility/reports/result_reconciliation.md</code> (69/69 claim, 0 MISMATCH).
+  Các giá trị đánh dấu “suy ra” hoặc “minh họa” là tính toán/mô phỏng bổ sung của tài liệu này, không in trong paper.</p>
+  <p>Bản quyền: mã nguồn và script trong repo theo giấy phép MIT (xem <code class="mi">reproducibility/LICENSE</code>);
+  văn bản paper và figure gốc thuộc về các tác giả. Trang này là tài liệu giảng dạy nội bộ, không phải bản công bố của paper.</p>
+</footer>
+</main>
+</div>
+<div class="toolbar">
+  <button id="themeBtn" type="button" title="Đổi giao diện sáng/tối">🌓 Sáng / tối</button>
+  <button id="topBtn" type="button" title="Lên đầu trang">↑ Đầu trang</button>
+</div>
+<script>
+(function(){
+  var root=document.documentElement;
+  var saved=null; try{saved=localStorage.getItem('a2capf-theme');}catch(e){}
+  if(saved){root.setAttribute('data-theme',saved);}
+  document.getElementById('themeBtn').addEventListener('click',function(){
+    var cur=root.getAttribute('data-theme')==='dark'?'':'dark';
+    if(cur){root.setAttribute('data-theme',cur);}else{root.removeAttribute('data-theme');}
+    try{localStorage.setItem('a2capf-theme',cur);}catch(e){}
+  });
+  document.getElementById('topBtn').addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+  var bar=document.getElementById('progress');
+  function onScroll(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    bar.style.width=(max>0?(h.scrollTop/max)*100:0)+'%';
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  var links=[].slice.call(document.querySelectorAll('nav#toc a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  function spy(){
+    var y=window.scrollY+120, idx=0;
+    for(var i=0;i<secs.length;i++){ if(secs[i] && secs[i].offsetTop<=y){idx=i;} }
+    links.forEach(function(a,i){a.classList.toggle('active',i===idx);});
+  }
+  window.addEventListener('scroll',spy,{passive:true}); spy();
+  window.addEventListener('beforeprint',function(){
+    [].slice.call(document.querySelectorAll('details')).forEach(function(d){d.open=true;});
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+inherits: base.yaml
+deterministic_policy: true          # model.predict(deterministic=True)
+
+maps:                               # the four canonical 300 m maps (map-random-02 defined but unused)
+  - {id: map-random-01,   seed: 7001, layout: random,   distance_m: 300, density: 0.8}
+  - {id: map-corridor-01, seed: 7013, layout: corridor, distance_m: 300, density: 0.8}
+  - {id: map-barrier-01,  seed: 7019, layout: barrier,  distance_m: 300, density: 0.8}
+  - {id: map-mixed-01,    seed: 7027, layout: mixed,     distance_m: 300, density: 0.8}
+
+training_seeds: [101, 211, 307, 401, 503]      # 5 independent runs/models per map (H0, H1)
+
+evaluation:
+  base_seeds: [1009, 1013, 1019, 1021, 1031]
+  episodes_per_base_seed: 10
+  numerical_seed_rule: base_seed + episode_index
+  slots_per_unit: 50
+  unique_numerical_seeds_per_unit: 32          # windows overlap; 18 slots are exact repeats
+
+layout:
+  units_per_learned_config: 20                  # 4 maps x 5 runs
+  rollouts_per_config: 1000                     # 20 x 50

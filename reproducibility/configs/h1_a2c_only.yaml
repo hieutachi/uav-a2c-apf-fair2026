@@ -1,0 +1,15 @@
+id: H1
+kind: ablation
+inherits: base.yaml
+policy_mode: a2c             # blended = raw A2C action; APF fully bypassed
+algorithm: A2C
+apf_weight: 0.0
+use_wind: true
+wind_multiplier: 1.0
+smoothing: true
+train: true
+budget_env_steps: 5000000
+observation_includes_obstacles: false
+note: >
+  Budget- and protocol-matched to H0 (same maps, seeds, evaluation realizations) but NOT matched in
+  obstacle information: H1 receives no obstacle geometry at all.

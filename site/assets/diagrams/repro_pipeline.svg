@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 470" width="980" height="470" role="img" aria-label="Pipeline tái lập kết quả" font-family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6672"/></marker><marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1565c0"/></marker></defs>
+<rect width="980" height="470" fill="#ffffff"/>
+<text x="24" y="34" text-anchor="start" font-size="17" fill="#1b1f23" font-weight="600">Pipeline tái lập: từ ledger tới từng con số trong paper</text>
+<text x="24" y="56" text-anchor="start" font-size="11.5" fill="#5b6672">Chạy `make analysis` — dưới 30 giây, không cần GPU, độc lập máy. Mọi số đều tái sinh, không copy.</text>
+<rect x="24" y="90" width="148" height="78" rx="10" ry="10" fill="#eef4fb" stroke="#1565c0" stroke-width="1.3"/>
+<text x="98.0" y="117.0" text-anchor="middle" font-size="11.2" fill="#1b1f23" font-weight="600">episode_audit.csv</text>
+<text x="98.0" y="132.5" text-anchor="middle" font-size="10.0" fill="#1b1f23">904 KB · 3000 rollout</text>
+<text x="98.0" y="148.4" text-anchor="middle" font-size="10.0" fill="#1b1f23">mỗi dòng đúng 1 nhãn</text>
+<line x1="172" y1="129" x2="192" y2="129" stroke="#5b6672" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="192" y="90" width="148" height="78" rx="10" ry="10" fill="#eef4fb" stroke="#1565c0" stroke-width="1.3"/>
+<text x="266.0" y="117.0" text-anchor="middle" font-size="11.2" fill="#1b1f23" font-weight="600">rollout_ledger.csv</text>
+<text x="266.0" y="132.5" text-anchor="middle" font-size="10.0" fill="#1b1f23">SHA-256 đã khóa</text>
+<text x="266.0" y="148.4" text-anchor="middle" font-size="10.0" fill="#1b1f23">fa133470…e9d1f6ec</text>
+<line x1="340" y1="129" x2="360" y2="129" stroke="#5b6672" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="360" y="90" width="148" height="78" rx="10" ry="10" fill="#f5f9f5" stroke="#2e7d32" stroke-width="1.3"/>
+<text x="434.0" y="117.0" text-anchor="middle" font-size="11.2" fill="#1b1f23" font-weight="600">01_build_unit_summaries</text>
+<text x="434.0" y="132.5" text-anchor="middle" font-size="10.0" fill="#1b1f23">20 đơn vị (map × run)</text>
+<text x="434.0" y="148.4" text-anchor="middle" font-size="10.0" fill="#1b1f23">cho mỗi controller</text>
+<line x1="508" y1="129" x2="528" y2="129" stroke="#5b6672" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="528" y="90" width="148" height="78" rx="10" ry="10" fill="#f5f9f5" stroke="#2e7d32" stroke-width="1.3"/>
+<text x="602.0" y="117.0" text-anchor="middle" font-size="11.2" fill="#1b1f23" font-weight="600">02_compute_statistics</text>
+<text x="602.0" y="132.5" text-anchor="middle" font-size="10.0" fill="#1b1f23">Wilson · Wilcoxon</text>
+<text x="602.0" y="148.4" text-anchor="middle" font-size="10.0" fill="#1b1f23">d_z · Hodges–Lehmann</text>
+<line x1="676" y1="129" x2="696" y2="129" stroke="#5b6672" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="696" y="90" width="148" height="78" rx="10" ry="10" fill="#fff8ef" stroke="#ef6c00" stroke-width="1.3"/>
+<text x="770.0" y="117.0" text-anchor="middle" font-size="11.2" fill="#1b1f23" font-weight="600">03_reconcile_claims</text>
+<text x="770.0" y="132.5" text-anchor="middle" font-size="10.0" fill="#1b1f23">69 claim ↔ paper</text>
+<text x="770.0" y="148.4" text-anchor="middle" font-size="10.0" fill="#1b1f23">29 exact · 40 rounding</text>
+<line x1="844" y1="129" x2="864" y2="129" stroke="#5b6672" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="864" y="90" width="148" height="78" rx="10" ry="10" fill="#fff8ef" stroke="#ef6c00" stroke-width="1.3"/>
+<text x="938.0" y="117.0" text-anchor="middle" font-size="11.2" fill="#1b1f23" font-weight="600">04_tables_and_figures</text>
+<text x="938.0" y="132.5" text-anchor="middle" font-size="10.0" fill="#1b1f23">5 bảng + biểu đồ</text>
+<text x="938.0" y="148.4" text-anchor="middle" font-size="10.0" fill="#1b1f23">sinh từ ledger</text>
+<rect x="24" y="206" width="190" height="46" rx="10" ry="10" fill="#ffffff" stroke="#2e7d32" stroke-width="1.3"/>
+<text x="119.0" y="233.2" text-anchor="middle" font-size="12" fill="#1b1f23" font-weight="600">Gate 1 — checksum</text>
+<rect x="226" y="206" width="694" height="46" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="238" y="233.0" text-anchor="start" font-size="11.4" fill="#5b6672" font-weight="600">182/182 artifact thô xác thực bằng SHA-256; 65 file trong gói release.</text>
+<rect x="24" y="258" width="190" height="46" rx="10" ry="10" fill="#ffffff" stroke="#2e7d32" stroke-width="1.3"/>
+<text x="119.0" y="285.2" text-anchor="middle" font-size="12" fill="#1b1f23" font-weight="600">Gate 2 — accounting</text>
+<rect x="226" y="258" width="694" height="46" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="238" y="285.0" text-anchor="start" font-size="11.4" fill="#5b6672" font-weight="600">Mỗi dòng đúng một nhãn kết thúc; mỗi controller 1000 rollout; mỗi ô controller×map = 250.</text>
+<rect x="24" y="310" width="190" height="46" rx="10" ry="10" fill="#ffffff" stroke="#1565c0" stroke-width="1.3"/>
+<text x="119.0" y="337.2" text-anchor="middle" font-size="12" fill="#1b1f23" font-weight="600">Gate 3 — pairing</text>
+<rect x="226" y="310" width="694" height="46" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="238" y="337.0" text-anchor="start" font-size="11.4" fill="#5b6672" font-weight="600">H0 và H1 chia sẻ đúng 20 cặp (map, training-run) — assert trên tập khóa, không phải trùng nhãn.</text>
+<rect x="24" y="362" width="190" height="46" rx="10" ry="10" fill="#ffffff" stroke="#ef6c00" stroke-width="1.3"/>
+<text x="119.0" y="389.2" text-anchor="middle" font-size="12" fill="#1b1f23" font-weight="600">Gate 4 — đối soát</text>
+<rect x="226" y="362" width="694" height="46" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="238" y="389.0" text-anchor="start" font-size="11.4" fill="#5b6672" font-weight="600">0 MISMATCH · 0 UNREPRODUCIBLE trên 69 claim; 25/25 test unit + gate PASS.</text>
+<rect x="24" y="418" width="896" height="74" rx="10" ry="10" fill="#fff8ef" stroke="#ef6c00" stroke-width="1.3"/>
+<text x="472.0" y="442.6" text-anchor="middle" font-size="11.6" fill="#1b1f23" font-weight="600">Quyết định release: CONDITIONAL PASS</text>
+<text x="472.0" y="458.6" text-anchor="middle" font-size="10.4" fill="#1b1f23">Điều kiện (a) 40 checkpoint + 4000 file .npz không phân phối trong gói (chỉ cần cho đánh giá lại / vẽ hình minh họa, KHÔNG cần để tái sinh số liệu);</text>
+<text x="472.0" y="475.1" text-anchor="middle" font-size="10.4" fill="#1b1f23">Điều kiện (b) huấn luyện lại từ đầu không tái lập bitwise vì PyTorch không được seed tường minh. Cả hai không ảnh hưởng bất kỳ con số nào đã báo cáo.</text>
+</svg>

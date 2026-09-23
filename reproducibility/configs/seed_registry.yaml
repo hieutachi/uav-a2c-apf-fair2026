@@ -1,0 +1,45 @@
+# Seed registry for the canonical evaluation.
+# Traced from scripts/run_rigorous_manifest.py, scripts/vnict_hybrid_experiments.py, scripts/a2c_new.py.
+schema_version: "1.0.0"
+source_commit: "c88b02b45631047e5994c8ca15e8d6226d004e2b"
+
+training:
+  seed_labels: [101, 211, 307, 401, 503]
+  applied_to:
+    python_random: "random.seed(train_seed)          # train_model()"
+    numpy_random:  "np.random.seed(train_seed)        # train_model()"
+    vec_env:       "make_vec_env(..., seed=train_seed) # SB3 VecEnv reset seeding"
+    obstacle_generator: "random.Random(train_seed)     # generate_obstacles() when maps are procedurally built"
+  notes: >
+    The A2C policy network / SB3 learning stack does NOT receive a separate explicit seed beyond the
+    global random/numpy seeds and the VecEnv seed. PyTorch global seeds and CUDA determinism flags are
+    NOT set. Training is therefore not bitwise reproducible across machines/driver versions.
+
+evaluation:
+  base_seeds: [1009, 1013, 1019, 1021, 1031]
+  episodes_per_base_seed: 10           # episode indices 0..9
+  numerical_seed_rule: "numerical_seed = base_seed + episode_index"
+  applied_to:
+    env_reset:  "VNICTDroneEnv.reset(seed=numerical_seed) -> Gymnasium seeds self.np_random"
+    wind_model: "WindModel(rng=self.np_random)  # shares the env RNG"
+    drone_reset: "Drone3D.reset(rng=self.np_random) # +/-0.5 m start perturbation, shares env RNG"
+    action:     "model.predict(obs, deterministic=True)  # no eval-time policy stochasticity"
+  reset_seed_equals_wind_seed: true    # single np_random drives both
+  deterministic_policy: true
+
+seed_windows:
+  # base+episode ranges overlap, collapsing 50 slots to 32 distinct numerical seeds.
+  windows:
+    - {base: 1009, range: [1009, 1018]}
+    - {base: 1013, range: [1013, 1022]}
+    - {base: 1019, range: [1019, 1028]}
+    - {base: 1021, range: [1021, 1030]}
+    - {base: 1031, range: [1031, 1040]}
+  unique_effective_seeds: 32
+  seed_min: 1009
+  seed_max: 1040
+  duplicate_note: >
+    18 of the 50 slots per unit reuse a numerical seed already present in the unit. Because the policy is
+    deterministic and the env RNG is fully determined by the numerical seed, duplicate-seed slots are exact
+    repeats (verified: 1080 byte-identical duplicate instances across the 60 units). Effective distinct
+    rollouts per unit = 32, not 50.

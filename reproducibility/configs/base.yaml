@@ -1,0 +1,58 @@
+# Shared constants (mirror of experiments/rigorous_manifest.json implementation_constants
+# and scripts/a2c_new.py). Source of truth remains the code; this file documents it for the release.
+protocol_id: vnict-rigorous-2026
+source_commit: c88b02b45631047e5994c8ca15e8d6226d004e2b
+
+dynamics:
+  mass_kg: 0.5
+  linear_drag_coefficient: 0.12
+  gravity_m_s2: 9.81
+  dt_s: 0.1
+  action_range: [-1.0, 1.0]
+  action_force_scale_n: 12.0          # per axis
+  altitude_bounds_m: [5.0, 6.0]        # z clamped; vz reset on clamp
+  vehicle_collision_radius_m: 0.0
+  integration: semi_implicit_euler
+  drag_reference: relative_air_velocity   # a = (F - kd*(v - wind))/m
+
+collision:
+  method: swept_segment_aabb_slab
+  priority_over_success: true
+
+clearance:
+  definition: nearest_surface_signed_aabb   # NOTE: different basis from APF repulsion
+
+apf:
+  attractive_gain: 0.04
+  repulsive_gain: 18.0
+  influence_radius_m: 6.0
+  distance_basis: aabb_center               # NOTE: center, not nearest surface
+  output_norm_cap: 1.0
+  normalize_then_clip: true
+  epsilon: 1.0e-6
+
+blend:
+  rule: "lambda_t = clip(1 - ||g - p_t|| / 300, 0.15, 0.55)"
+  schedule_check_m: {335.4: 0.15, 255: 0.15, 135: 0.55, 0: 0.55}
+
+wind:
+  model: dryden_lite_ar1
+  base_speed_m_s: 2.0
+  gust_sigma_m_s: 1.2
+  time_constant_s: 0.9
+  horizontal_correlation: 0.35
+  vertical_variance_scale: 0.09
+
+observation:
+  dim: 12
+  layout: [position_3, velocity_3, goal_displacement_3, wind_3]
+  contains_obstacle_geometry: false
+
+horizon:
+  formula: "H = floor((D_xy / (v_ref * dt)) * 1.8) + 300"
+  v_ref_m_s: 5.0
+  nominal_D_xy_m: 335.41          # sqrt(300^2 + 150^2)
+  nominal_H: 1507
+
+success:
+  arrive_distance_m: 3.0

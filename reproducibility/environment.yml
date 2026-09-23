@@ -1,0 +1,16 @@
+name: uav-a2c-apf-repro
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13
+  - pip
+  - pip:
+      - numpy==2.1.1
+      - scipy==1.15.2
+      - matplotlib==3.10.1
+      - pandas==2.2.3
+      - gymnasium==1.2.0
+      - stable-baselines3==2.7.0
+      - torch==2.6.0
+      - pytest>=8.0
+      - PyYAML>=6.0

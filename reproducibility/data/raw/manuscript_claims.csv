@@ -1,0 +1,70 @@
+claim_id,manuscript_location,recompute_key,reported_value,tolerance,kind
+C-OUT-H0-succ,Table (aggregate outcomes),count::H0::success,1000,0,count
+C-OUT-H0-coll,Table (aggregate outcomes),count::H0::collision,0,0,count
+C-OUT-H0-time,Table (aggregate outcomes),count::H0::timeout,0,0,count
+C-OUT-H1-succ,Table (aggregate outcomes),count::H1::success,830,0,count
+C-OUT-H1-coll,Table (aggregate outcomes),count::H1::collision,58,0,count
+C-OUT-H1-time,Table (aggregate outcomes),count::H1::timeout,112,0,count
+C-OUT-H2-succ,Table (aggregate outcomes),count::H2::success,55,0,count
+C-OUT-H2-coll,Table (aggregate outcomes),count::H2::collision,905,0,count
+C-OUT-H2-time,Table (aggregate outcomes),count::H2::timeout,40,0,count
+C-MAP-H0-random,Table (map-level),mapcount::H0::map-random-01::success,250,0,count
+C-MAP-H0-corridor,Table (map-level),mapcount::H0::map-corridor-01::success,250,0,count
+C-MAP-H0-barrier,Table (map-level),mapcount::H0::map-barrier-01::success,250,0,count
+C-MAP-H0-mixed,Table (map-level),mapcount::H0::map-mixed-01::success,250,0,count
+C-MAP-H1-random,Table (map-level),mapcount::H1::map-random-01::success,140,0,count
+C-MAP-H1-corridor,Table (map-level),mapcount::H1::map-corridor-01::success,240,0,count
+C-MAP-H1-barrier,Table (map-level),mapcount::H1::map-barrier-01::success,200,0,count
+C-MAP-H1-mixed,Table (map-level),mapcount::H1::map-mixed-01::success,250,0,count
+C-MAP-H2-random,Table (map-level),mapcount::H2::map-random-01::success,50,0,count
+C-MAP-H2-corridor,Table (map-level),mapcount::H2::map-corridor-01::success,0,0,count
+C-MAP-H2-barrier,Table (map-level),mapcount::H2::map-barrier-01::success,5,0,count
+C-MAP-H2-mixed,Table (map-level),mapcount::H2::map-mixed-01::success,0,0,count
+C-CONT-H0-clear-mean,Table (continuous metrics),cont::H0::clearance::mean,7.24,0.01,continuous
+C-CONT-H0-clear-sd,Table (continuous metrics),cont::H0::clearance::sd,5.24,0.01,continuous
+C-CONT-H0-steps-mean,Table (continuous metrics),cont::H0::steps::mean,104.4,0.1,continuous
+C-CONT-H0-steps-sd,Table (continuous metrics),cont::H0::steps::sd,22.7,0.1,continuous
+C-CONT-H0-jit-mean,Table (continuous metrics),cont::H0::jitter::mean,28.53,0.01,continuous
+C-CONT-H0-jit-sd,Table (continuous metrics),cont::H0::jitter::sd,9.03,0.01,continuous
+C-CONT-H0-acc-mean,Table (continuous metrics),cont::H0::acceleration::mean,16.08,0.01,continuous
+C-CONT-H0-acc-sd,Table (continuous metrics),cont::H0::acceleration::sd,1.67,0.01,continuous
+C-CONT-H1-clear-mean,Table (continuous metrics),cont::H1::clearance::mean,7.77,0.01,continuous
+C-CONT-H1-clear-sd,Table (continuous metrics),cont::H1::clearance::sd,6.28,0.01,continuous
+C-CONT-H1-steps-mean,Table (continuous metrics),cont::H1::steps::mean,237.8,0.1,continuous
+C-CONT-H1-steps-sd,Table (continuous metrics),cont::H1::steps::sd,451.3,0.5,continuous
+C-CONT-H1-jit-mean,Table (continuous metrics),cont::H1::jitter::mean,55.33,0.01,continuous
+C-CONT-H1-jit-sd,Table (continuous metrics),cont::H1::jitter::sd,14.68,0.01,continuous
+C-CONT-H1-acc-mean,Table (continuous metrics),cont::H1::acceleration::mean,22.85,0.01,continuous
+C-CONT-H1-acc-sd,Table (continuous metrics),cont::H1::acceleration::sd,7.00,0.01,continuous
+C-CONT-H2-clear-mean,Table (continuous metrics),cont::H2::clearance::mean,0.76,0.01,continuous
+C-CONT-H2-clear-sd,Table (continuous metrics),cont::H2::clearance::sd,3.70,0.01,continuous
+C-CONT-H2-steps-mean,Table (continuous metrics),cont::H2::steps::mean,408.0,0.1,continuous
+C-CONT-H2-steps-sd,Table (continuous metrics),cont::H2::steps::sd,339.0,0.5,continuous
+C-CONT-H2-jit-mean,Table (continuous metrics),cont::H2::jitter::mean,2.21,0.01,continuous
+C-CONT-H2-jit-sd,Table (continuous metrics),cont::H2::jitter::sd,0.82,0.01,continuous
+C-CONT-H2-acc-mean,Table (continuous metrics),cont::H2::acceleration::mean,0.45,0.01,continuous
+C-CONT-H2-acc-sd,Table (continuous metrics),cont::H2::acceleration::sd,0.10,0.01,continuous
+C-PAIR-succ-diff,Paired H0-H1 (success),paired::success::mean_diff,-0.17,0.005,paired
+C-PAIR-succ-dz,Paired H0-H1 (success),paired::success::dz,-0.509,0.005,paired
+C-PAIR-succ-p,Paired H0-H1 (success),paired::success::wilcoxon_p,0.0273,0.001,paired
+C-PAIR-succ-n,Paired H0-H1 (success),paired::success::n,20,0,paired
+C-PAIR-jit-diff,Paired H0-H1 (jitter),paired::jitter::mean_diff,26.80,0.05,paired
+C-PAIR-jit-dz,Paired H0-H1 (jitter),paired::jitter::dz,1.78,0.01,paired
+C-PAIR-jit-n,Paired H0-H1 (jitter),paired::jitter::n,20,0,paired
+C-PAIR-acc-diff,Paired H0-H1 (acceleration),paired::acceleration::mean_diff,6.77,0.05,paired
+C-PAIR-acc-dz,Paired H0-H1 (acceleration),paired::acceleration::dz,1.07,0.01,paired
+C-PAIR-acc-p,Paired H0-H1 (acceleration),paired::acceleration::wilcoxon_p,0.006,0.001,paired
+C-PAIR-acc-n,Paired H0-H1 (acceleration),paired::acceleration::n,20,0,paired
+C-PAIR-eff-diff,Paired H0-H1 (efficiency),paired::efficiency::mean_diff,0.0142,0.001,paired
+C-PAIR-eff-dz,Paired H0-H1 (efficiency),paired::efficiency::dz,0.156,0.005,paired
+C-PAIR-eff-p,Paired H0-H1 (efficiency),paired::efficiency::wilcoxon_p,0.417,0.005,paired
+C-PAIR-eff-n,Paired H0-H1 (efficiency),paired::efficiency::n,18,0,paired
+C-PAIR-clear-diff,Paired H0-H1 (clearance),paired::clearance::mean_diff,0.533,0.005,paired
+C-PAIR-clear-dz,Paired H0-H1 (clearance),paired::clearance::dz,0.063,0.005,paired
+C-PAIR-clear-p,Paired H0-H1 (clearance),paired::clearance::wilcoxon_p,0.956,0.005,paired
+C-PAIR-clear-n,Paired H0-H1 (clearance),paired::clearance::n,20,0,paired
+C-PAIR-steps-diff,Paired H0-H1 (steps),paired::steps::mean_diff,133.37,0.05,paired
+C-PAIR-steps-dz,Paired H0-H1 (steps),paired::steps::dz,0.300,0.005,paired
+C-PAIR-steps-p,Paired H0-H1 (steps),paired::steps::wilcoxon_p,0.123,0.005,paired
+C-PAIR-steps-n,Paired H0-H1 (steps),paired::steps::n,20,0,paired
+C-SEED-unique,Seeds/protocol,seeds::unique_effective,32,0,integer

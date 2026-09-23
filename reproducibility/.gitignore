@@ -1,0 +1,29 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Environments
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Large regenerable / non-redistributable artifacts (see data/README.md, models/README.md)
+models/*.zip
+data/raw/trajectories/
+figures/generated/*.png
+!figures/generated/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# Never commit secrets
+*.env
+.env
+credentials.json
+*.key
+*.pem

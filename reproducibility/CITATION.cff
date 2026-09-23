@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the paper and the software."
+title: "Component Evaluation of Hybrid A2C-APF Guidance in Wind-Perturbed UAV Simulation (reproducibility package)"
+type: software
+authors:
+  - family-names: "Ta"
+    given-names: "Chi Hieu"
+  - family-names: "Nguyen"
+    given-names: "Anh Huy"
+  - family-names: "Vu"
+    given-names: "Minh Hoa"
+version: "1.0.0"
+date-released: "2026-08-16"
+license: MIT
+repository-code: "<REPO_URL>"
+keywords:
+  - UAV navigation
+  - reinforcement learning
+  - A2C
+  - artificial potential field
+  - reproducibility
+preferred-citation:
+  type: conference-paper
+  title: "Component Evaluation of Hybrid A2C-APF Guidance in Wind-Perturbed UAV Simulation"
+  authors:
+    - family-names: "Ta"
+      given-names: "Chi Hieu"
+    - family-names: "Nguyen"
+      given-names: "Anh Huy"
+    - family-names: "Vu"
+      given-names: "Minh Hoa"
+  collection-title: "FAIR 2026 (submission)"
+  year: 2026

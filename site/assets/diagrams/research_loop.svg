@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 300" width="980" height="300" role="img" aria-label="Vòng nghiên cứu của paper" font-family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6672"/></marker><marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1565c0"/></marker></defs>
+<rect width="980" height="300" fill="#ffffff"/>
+<text x="24" y="34" text-anchor="start" font-size="17" fill="#1b1f23" font-weight="600">Vòng nghiên cứu: paper này là một 'component evaluation', không phải một 'system paper'</text>
+<rect x="24" y="74" width="176" height="84" rx="10" ry="10" fill="#eef4fb" stroke="#1565c0" stroke-width="1.3"/>
+<text x="112.0" y="103.2" text-anchor="middle" font-size="12" fill="#1b1f23" font-weight="600">1. Câu hỏi hẹp</text>
+<text x="112.0" y="119.8" text-anchor="middle" font-size="10.8" fill="#1b1f23">Kênh APF thêm được gì</text>
+<text x="112.0" y="136.8" text-anchor="middle" font-size="10.8" fill="#1b1f23">vào một A2C cố định?</text>
+<line x1="200" y1="116" x2="218" y2="116" stroke="#5b6672" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="218" y="74" width="176" height="84" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="306.0" y="103.2" text-anchor="middle" font-size="12" fill="#1b1f23" font-weight="600">2. Đặc tả implementation</text>
+<text x="306.0" y="119.8" text-anchor="middle" font-size="10.8" fill="#1b1f23">obs 12-D · lực 12 N/trục</text>
+<text x="306.0" y="136.8" text-anchor="middle" font-size="10.8" fill="#1b1f23">APF theo tâm · λ theo khoảng cách</text>
+<line x1="394" y1="116" x2="412" y2="116" stroke="#5b6672" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="412" y="74" width="176" height="84" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="500.0" y="103.2" text-anchor="middle" font-size="12" fill="#1b1f23" font-weight="600">3. Thiết kế đối chứng</text>
+<text x="500.0" y="119.8" text-anchor="middle" font-size="10.8" fill="#1b1f23">H0 vs H1 (khớp ngân sách)</text>
+<text x="500.0" y="136.8" text-anchor="middle" font-size="10.8" fill="#1b1f23">H2 tham chiếu · H4 chẩn đoán</text>
+<line x1="588" y1="116" x2="606" y2="116" stroke="#5b6672" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="606" y="74" width="176" height="84" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="694.0" y="103.2" text-anchor="middle" font-size="12" fill="#1b1f23" font-weight="600">4. Đo + audit</text>
+<text x="694.0" y="119.8" text-anchor="middle" font-size="10.8" fill="#1b1f23">3000 rollout · ledger</text>
+<text x="694.0" y="136.8" text-anchor="middle" font-size="10.8" fill="#1b1f23">69 claim đối soát</text>
+<line x1="782" y1="116" x2="800" y2="116" stroke="#5b6672" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="800" y="74" width="176" height="84" rx="10" ry="10" fill="#eef4fb" stroke="#1565c0" stroke-width="1.3"/>
+<text x="888.0" y="103.2" text-anchor="middle" font-size="12" fill="#1b1f23" font-weight="600">5. Phạm vi tuyên bố</text>
+<text x="888.0" y="119.8" text-anchor="middle" font-size="10.8" fill="#1b1f23">Chỉ nói những gì dữ liệu</text>
+<text x="888.0" y="136.8" text-anchor="middle" font-size="10.8" fill="#1b1f23">ủng hộ; khai báo asymmetry</text>
+<rect x="24" y="190" width="932" height="76" rx="10" ry="10" fill="#f5f9f5" stroke="#2e7d32" stroke-width="1.3"/>
+<text x="490.0" y="215.4" text-anchor="middle" font-size="11.8" fill="#1b1f23" font-weight="600">Vì sao vòng này đáng học: bước 5 không phóng đại kết quả của bước 4.</text>
+<text x="490.0" y="231.7" text-anchor="middle" font-size="10.600000000000001" fill="#1b1f23">Ba chỉ số có bằng chứng (success p = 0.027 · acceleration p = 0.006 · jitter p &lt; 0.001) được tách bạch với ba chỉ số KHÔNG được ủng hộ</text>
+<text x="490.0" y="248.5" text-anchor="middle" font-size="10.600000000000001" fill="#1b1f23">(efficiency p = 0.417 · clearance p = 0.956 · steps p = 0.123) — và cả sáu đều là p-value khám phá, chưa hiệu chỉnh đa bội.</text>
+</svg>

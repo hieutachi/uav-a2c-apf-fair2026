@@ -1,0 +1,15 @@
+# Pinned to the environment that produced the canonical results (Python 3.13).
+# Archival ANALYSIS reproduction needs only numpy + scipy.
+numpy==2.1.1
+scipy==1.15.2
+matplotlib==3.10.1
+pandas==2.2.3
+# Simulation / (re)training / evaluation from checkpoints:
+gymnasium==1.2.0
+stable-baselines3==2.7.0
+# Install torch matching your platform/CUDA; canonical runs used:
+#   torch==2.6.0+cu124  (CPU-only torch==2.6.0 is sufficient; training used device="cpu")
+torch==2.6.0
+# Dev/test:
+pytest>=8.0
+PyYAML>=6.0

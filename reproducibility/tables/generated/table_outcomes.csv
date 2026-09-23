@@ -1,0 +1,4 @@
+controller,n,success,collision,timeout,success_rate,wilson_lo,wilson_hi
+H0,1000,1000,0,0,1.0000,0.9962,1.0000
+H1,1000,830,58,112,0.8300,0.8055,0.8520
+H2,1000,55,905,40,0.0550,0.0425,0.0709

@@ -1,0 +1,14 @@
+id: H2
+kind: nonlearned_control
+inherits: base.yaml
+policy_mode: apf             # blended = a_APF; model is None; action ignored
+algorithm: none
+apf_weight: 1.0
+use_wind: true
+wind_multiplier: 1.0
+smoothing: true
+train: false
+budget_env_steps: 0
+note: >
+  Non-learned. The five per-map "units" are repeated deterministic evaluations of one fixed APF controller,
+  NOT independent training runs; H2 provides no training-run replication.

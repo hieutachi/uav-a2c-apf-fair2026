@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 430" width="980" height="430" role="img" aria-label="Ghép cặp H0 và H1" font-family="Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6672"/></marker><marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1565c0"/></marker></defs>
+<rect width="980" height="430" fill="#ffffff"/>
+<text x="24" y="34" text-anchor="start" font-size="17" fill="#1b1f23" font-weight="600">Ghép cặp H0 – H1: cái gì khớp và cái gì không</text>
+<text x="24" y="56" text-anchor="start" font-size="11.5" fill="#5b6672">Hai hàng cuối là lý do paper không thể tuyên bố 'APF tốt hơn học thuần túy'.</text>
+<rect x="60" y="86" width="340" height="44" rx="10" ry="10" fill="#f5f9f5" stroke="#2e7d32" stroke-width="1.3"/>
+<text x="230.0" y="103.5" text-anchor="middle" font-size="12.5" fill="#1b1f23" font-weight="600">H0 — Hybrid</text>
+<text x="230.0" y="120.8" text-anchor="middle" font-size="11.3" fill="#1b1f23">A2C + APF blend (λₜ ∈ [0.15, 0.55])</text>
+<rect x="580" y="86" width="340" height="44" rx="10" ry="10" fill="#fff8ef" stroke="#ef6c00" stroke-width="1.3"/>
+<text x="750.0" y="103.5" text-anchor="middle" font-size="12.5" fill="#1b1f23" font-weight="600">H1 — Chỉ A2C</text>
+<text x="750.0" y="120.8" text-anchor="middle" font-size="11.3" fill="#1b1f23">policy_mode = 'a2c', apf_weight = 0</text>
+<text x="490" y="113" text-anchor="middle" font-size="11.5" fill="#5b6672">ghép cặp</text>
+<line x1="400" y1="108" x2="580" y2="108" stroke="#5b6672" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#ah)"/>
+<rect x="60" y="152" width="300" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="72" y="173.1" text-anchor="start" font-size="11.8" fill="#1b1f23" font-weight="600">Map (hình học vật cản)</text>
+<rect x="372" y="152" width="96" height="34" rx="10" ry="10" fill="#f5f9f5" stroke="#2e7d32" stroke-width="1.3"/>
+<text x="420.0" y="173.0" text-anchor="middle" font-size="11.5" fill="#2e7d32" font-weight="600">KHỚP</text>
+<rect x="480" y="152" width="440" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="492" y="172.8" text-anchor="start" font-size="11" fill="#5b6672" font-weight="600">cùng map_sha256</text>
+<rect x="60" y="190" width="300" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="72" y="211.1" text-anchor="start" font-size="11.8" fill="#1b1f23" font-weight="600">Nhãn training seed</text>
+<rect x="372" y="190" width="96" height="34" rx="10" ry="10" fill="#f5f9f5" stroke="#2e7d32" stroke-width="1.3"/>
+<text x="420.0" y="211.0" text-anchor="middle" font-size="11.5" fill="#2e7d32" font-weight="600">KHỚP</text>
+<rect x="480" y="190" width="440" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="492" y="210.8" text-anchor="start" font-size="11" fill="#5b6672" font-weight="600">101 · 211 · 307 · 401 · 503</text>
+<rect x="60" y="228" width="300" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="72" y="249.1" text-anchor="start" font-size="11.8" fill="#1b1f23" font-weight="600">Ngân sách huấn luyện</text>
+<rect x="372" y="228" width="96" height="34" rx="10" ry="10" fill="#f5f9f5" stroke="#2e7d32" stroke-width="1.3"/>
+<text x="420.0" y="249.0" text-anchor="middle" font-size="11.5" fill="#2e7d32" font-weight="600">KHỚP</text>
+<rect x="480" y="228" width="440" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="492" y="248.8" text-anchor="start" font-size="11" fill="#5b6672" font-weight="600">5.000.000 bước / unit</text>
+<rect x="60" y="266" width="300" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="72" y="287.1" text-anchor="start" font-size="11.8" fill="#1b1f23" font-weight="600">Realization reset + gió AR(1)</text>
+<rect x="372" y="266" width="96" height="34" rx="10" ry="10" fill="#f5f9f5" stroke="#2e7d32" stroke-width="1.3"/>
+<text x="420.0" y="287.0" text-anchor="middle" font-size="11.5" fill="#2e7d32" font-weight="600">KHỚP</text>
+<rect x="480" y="266" width="440" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="492" y="286.9" text-anchor="start" font-size="11" fill="#5b6672" font-weight="600">cùng numerical_seed → env.reset(seed=…)</text>
+<rect x="60" y="304" width="300" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="72" y="325.1" text-anchor="start" font-size="11.8" fill="#1b1f23" font-weight="600">Số rollout mỗi unit</text>
+<rect x="372" y="304" width="96" height="34" rx="10" ry="10" fill="#f5f9f5" stroke="#2e7d32" stroke-width="1.3"/>
+<text x="420.0" y="325.0" text-anchor="middle" font-size="11.5" fill="#2e7d32" font-weight="600">KHỚP</text>
+<rect x="480" y="304" width="440" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="492" y="324.9" text-anchor="start" font-size="11" fill="#5b6672" font-weight="600">50 slot (32 seed phân biệt)</text>
+<rect x="60" y="342" width="300" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="72" y="363.1" text-anchor="start" font-size="11.8" fill="#1b1f23" font-weight="600">Trọng số policy đã học</text>
+<rect x="372" y="342" width="96" height="34" rx="10" ry="10" fill="#fff5f5" stroke="#c62828" stroke-width="1.3"/>
+<text x="420.0" y="363.0" text-anchor="middle" font-size="11.5" fill="#c62828" font-weight="600">KHÔNG</text>
+<rect x="480" y="342" width="440" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="492" y="362.9" text-anchor="start" font-size="11" fill="#5b6672" font-weight="600">hai model khác nhau — đây là đối tượng so sánh</text>
+<rect x="60" y="380" width="300" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="72" y="401.1" text-anchor="start" font-size="11.8" fill="#1b1f23" font-weight="600">Thông tin vật cản đầu vào</text>
+<rect x="372" y="380" width="96" height="34" rx="10" ry="10" fill="#fff5f5" stroke="#c62828" stroke-width="1.3"/>
+<text x="420.0" y="401.0" text-anchor="middle" font-size="11.5" fill="#c62828" font-weight="600">KHÔNG</text>
+<rect x="480" y="380" width="440" height="34" rx="10" ry="10" fill="#ffffff" stroke="#dfe4ea" stroke-width="1.3"/>
+<text x="492" y="400.9" text-anchor="start" font-size="11" fill="#5b6672" font-weight="600">H0 có qua APF · H1 không có → BẤT ĐỐI XỨNG</text>
+<rect x="60" y="424" width="860" height="52" rx="10" ry="10" fill="#fff5f5" stroke="#c62828" stroke-width="1.3"/>
+<text x="490.0" y="445.8" text-anchor="middle" font-size="11.8" fill="#1b1f23">Hệ quả diễn giải: H0 − H1 đo giá trị của CẢ kênh APF cùng với đầu vào hình học đặc quyền của nó.</text>
+<text x="490.0" y="462.1" text-anchor="middle" font-size="10.600000000000001" fill="#1b1f23">Muốn cô lập 'phép tính trường thế năng', cần một H1b nhận đặc trưng vật cản tương đương mà không có blend APF.</text>
+</svg>

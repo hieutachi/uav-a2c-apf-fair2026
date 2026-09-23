@@ -1,0 +1,12 @@
+id: H0
+kind: primary
+inherits: base.yaml
+policy_mode: hybrid          # u = (1-lambda)*a_A2C + lambda*a_APF
+algorithm: A2C
+apf_weight: null             # adaptive lambda from base.blend.rule
+use_wind: true
+wind_multiplier: 1.0
+smoothing: true              # post-processing metric only; not closed-loop
+train: true
+budget_env_steps: 5000000
+observation_includes_obstacles: false   # geometry enters ONLY via APF channel
