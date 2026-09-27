@@ -2,7 +2,10 @@
 
 Protocol: `experiments/icai2026_manifest.json` (declared 2026-09-28, before any new result was inspected).
 Parent protocol: `vnict-rigorous-2026` (FAIR 2026 submission, rejected). Frozen artifacts: `results/rigorous/` (read-only).
-Status: **RUNNING** — H3 training pool and frozen-policy evaluations launched 2026-09-28 ~00:35 local. Results sections are filled as jobs complete; nothing below is interpolated.
+Status: **COMPLETE** for P0+P1 (H3 training 20/20 units, corrected-seed eval, wind sweep, APF sensitivity,
+held-out, action logging, evaluation-time blend sensitivity). P2 (fixed-λ *training* ablation) dropped per the
+brief's stop conditions; it remains the only open experimental item. All result sections below are filled from
+`results/icai2026/**/*.csv`; nothing is interpolated.
 
 ---
 
