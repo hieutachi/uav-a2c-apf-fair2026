@@ -1,0 +1,251 @@
+{
+  "epsilon_absolute": 1e-08,
+  "epsilon_relative_to_k_att": 0.0004,
+  "note": "evaluation-only replay of frozen controllers; no retraining",
+  "groups": {
+    "H0_center": {
+      "steps": 103682,
+      "active_abs": 0,
+      "active_rel": 0,
+      "steps_success": 103682,
+      "active_abs_success": 0,
+      "episodes": 1000,
+      "episodes_with_activation": 0,
+      "per_map": {
+        "map-random-01": {
+          "active": 0,
+          "steps": 29020,
+          "fraction": 0.0
+        },
+        "map-corridor-01": {
+          "active": 0,
+          "steps": 26584,
+          "fraction": 0.0
+        },
+        "map-barrier-01": {
+          "active": 0,
+          "steps": 23756,
+          "fraction": 0.0
+        },
+        "map-mixed-01": {
+          "active": 0,
+          "steps": 24322,
+          "fraction": 0.0
+        }
+      },
+      "per_seed": {
+        "101": {
+          "active": 0,
+          "steps": 18425,
+          "fraction": 0.0
+        },
+        "211": {
+          "active": 0,
+          "steps": 25195,
+          "fraction": 0.0
+        },
+        "307": {
+          "active": 0,
+          "steps": 20418,
+          "fraction": 0.0
+        },
+        "401": {
+          "active": 0,
+          "steps": 20776,
+          "fraction": 0.0
+        },
+        "503": {
+          "active": 0,
+          "steps": 18868,
+          "fraction": 0.0
+        }
+      },
+      "fraction_all_steps": 0.0,
+      "fraction_success_steps": 0.0,
+      "fraction_episodes_with_activation": 0.0
+    },
+    "H2_center": {
+      "steps": 475015,
+      "active_abs": 0,
+      "active_rel": 0,
+      "steps_success": 101070,
+      "active_abs_success": 0,
+      "episodes": 1000,
+      "episodes_with_activation": 0,
+      "per_map": {
+        "map-random-01": {
+          "active": 0,
+          "steps": 161055,
+          "fraction": 0.0
+        },
+        "map-corridor-01": {
+          "active": 0,
+          "steps": 72870,
+          "fraction": 0.0
+        },
+        "map-barrier-01": {
+          "active": 0,
+          "steps": 140515,
+          "fraction": 0.0
+        },
+        "map-mixed-01": {
+          "active": 0,
+          "steps": 100575,
+          "fraction": 0.0
+        }
+      },
+      "per_seed": {
+        "101": {
+          "active": 0,
+          "steps": 95003,
+          "fraction": 0.0
+        },
+        "211": {
+          "active": 0,
+          "steps": 95003,
+          "fraction": 0.0
+        },
+        "307": {
+          "active": 0,
+          "steps": 95003,
+          "fraction": 0.0
+        },
+        "401": {
+          "active": 0,
+          "steps": 95003,
+          "fraction": 0.0
+        },
+        "503": {
+          "active": 0,
+          "steps": 95003,
+          "fraction": 0.0
+        }
+      },
+      "fraction_all_steps": 0.0,
+      "fraction_success_steps": 0.0,
+      "fraction_episodes_with_activation": 0.0
+    },
+    "H2_surface": {
+      "steps": 1324280,
+      "active_abs": 404615,
+      "active_rel": 402240,
+      "steps_success": 480360,
+      "active_abs_success": 67020,
+      "episodes": 1000,
+      "episodes_with_activation": 945,
+      "per_map": {
+        "map-random-01": {
+          "active": 84800,
+          "steps": 322275,
+          "fraction": 0.263129
+        },
+        "map-corridor-01": {
+          "active": 128980,
+          "steps": 349810,
+          "fraction": 0.368714
+        },
+        "map-barrier-01": {
+          "active": 97630,
+          "steps": 326285,
+          "fraction": 0.299217
+        },
+        "map-mixed-01": {
+          "active": 93205,
+          "steps": 325910,
+          "fraction": 0.285984
+        }
+      },
+      "per_seed": {
+        "101": {
+          "active": 80923,
+          "steps": 264856,
+          "fraction": 0.305536
+        },
+        "211": {
+          "active": 80923,
+          "steps": 264856,
+          "fraction": 0.305536
+        },
+        "307": {
+          "active": 80923,
+          "steps": 264856,
+          "fraction": 0.305536
+        },
+        "401": {
+          "active": 80923,
+          "steps": 264856,
+          "fraction": 0.305536
+        },
+        "503": {
+          "active": 80923,
+          "steps": 264856,
+          "fraction": 0.305536
+        }
+      },
+      "fraction_all_steps": 0.305536,
+      "fraction_success_steps": 0.13952,
+      "fraction_episodes_with_activation": 0.945
+    },
+    "H0_counterfactual_surface": {
+      "steps": 103682,
+      "active_abs": 2103,
+      "active_rel": 2087,
+      "steps_success": 103682,
+      "active_abs_success": 2103,
+      "episodes": 1000,
+      "episodes_with_activation": 549,
+      "per_map": {
+        "map-random-01": {
+          "active": 217,
+          "steps": 29020,
+          "fraction": 0.007478
+        },
+        "map-corridor-01": {
+          "active": 714,
+          "steps": 26584,
+          "fraction": 0.026858
+        },
+        "map-barrier-01": {
+          "active": 302,
+          "steps": 23756,
+          "fraction": 0.012713
+        },
+        "map-mixed-01": {
+          "active": 870,
+          "steps": 24322,
+          "fraction": 0.03577
+        }
+      },
+      "per_seed": {
+        "101": {
+          "active": 340,
+          "steps": 18425,
+          "fraction": 0.018453
+        },
+        "211": {
+          "active": 371,
+          "steps": 25195,
+          "fraction": 0.014725
+        },
+        "307": {
+          "active": 168,
+          "steps": 20418,
+          "fraction": 0.008228
+        },
+        "401": {
+          "active": 454,
+          "steps": 20776,
+          "fraction": 0.021852
+        },
+        "503": {
+          "active": 770,
+          "steps": 18868,
+          "fraction": 0.04081
+        }
+      },
+      "fraction_all_steps": 0.020283,
+      "fraction_success_steps": 0.020283,
+      "fraction_episodes_with_activation": 0.549
+    }
+  }
+}

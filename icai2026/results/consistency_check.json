@@ -1,0 +1,40 @@
+{
+  "n_pass": 150,
+  "n_fail": 0,
+  "fail": [],
+  "warn": [
+    {
+      "category": "wind_wording",
+      "hits": [
+        "main.tex:232: geometry- and control-driven"
+      ]
+    },
+    {
+      "category": "apf_wording",
+      "hits": [
+        "main.tex:252: removes collisions entirely"
+      ]
+    },
+    {
+      "category": "heldout_wording",
+      "hits": [
+        "main.tex:278: same-layout training map"
+      ]
+    },
+    {
+      "category": "causal_overreach",
+      "hits": [
+        "main.tex:302: accounts for most"
+      ]
+    },
+    {
+      "category": "fair_mentions_in_manuscript (removal list, brief Q)",
+      "hits": [
+        "main.tex:66: prior submission",
+        "main.tex:68: Reviewer",
+        "main.tex:70: This revision",
+        "main.tex:70: revision answers"
+      ]
+    }
+  ]
+}

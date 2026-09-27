@@ -1,310 +1,388 @@
-# REPORT — ICAI-FAI 2026 revision (deadline 2026-09-30)
+# REPORT — ICAI-FAI 2026 revision (AUDITED, STORY-LOCKED)
 
-Protocol: `experiments/icai2026_manifest.json` (declared 2026-09-28, before any new result was inspected).
-Parent protocol: `vnict-rigorous-2026` (FAIR 2026 submission, rejected). Frozen artifacts: `results/rigorous/` (read-only).
-Status: **COMPLETE** for P0+P1 (H3 training 20/20 units, corrected-seed eval, wind sweep, APF sensitivity,
-held-out, action logging, evaluation-time blend sensitivity). P2 (fixed-λ *training* ablation) dropped per the
-brief's stop conditions; it remains the only open experimental item. All result sections below are filled from
-`results/icai2026/**/*.csv`; nothing is interpolated.
+Deadline: 2026-09-30. Parent protocol: `vnict-rigorous-2026` (FAIR 2026, rejected). Frozen artifacts: `results/rigorous/` (read-only).
+Pre-audit snapshot preserved at `REPORT_ICAI2026_REVISION.pre-audit.md`.
 
----
+## 0. AUDIT STATUS and SOURCE-OF-TRUTH hierarchy
 
-## 1. Repository state and implementation facts (inspection, section D of the brief)
+Audit executed 2026-09-28: full numerical reconciliation (150 automated checks, 0 failures), direct APF
+activation measurement, H3 representation audit, status hygiene, and wording audit.
+Checker: `scripts/icai2026_consistency_check.py` → `results/icai2026/consistency_check.json`
+(currently **150 PASS / 0 FAIL**). Master numbers: `results/icai2026/MASTER_RESULTS.json`.
+Every manuscript number must be copied from MASTER_RESULTS.json or from the tables below, never from prose.
 
-Interpreter: `C:\Users\N4G\AppData\Local\Programs\Python\Python313\python.exe` (Python 3.13.3, torch 2.6.0+cu124,
-SB3 2.7.0, gymnasium 1.2.0, numpy 2.1.1). The default `python` on PATH (3.14) has **no torch** and must not be used.
+Priority order when sources disagree (brief B):
+1. raw machine-readable CSV/JSON in `results/icai2026/`;
+2. per-run ledgers / trajectory logs / action logs;
+3. analysis scripts recomputing statistics (`icai2026_analyze.py`, `icai2026_consistency_check.py`);
+4. `experiments/icai2026_manifest.json`;
+5. this report;
+6. ICAI manuscript;
+7. FAIR manuscript.
+FAIR numbers and ICAI numbers are kept separate everywhere; FAIR values are labelled "FAIR (old schedule)".
 
-**Environment repair (blocking, now fixed).** The Python313 `mpmath 1.3.0` installation was corrupted
-(`mpmath/libmp/gammazeta.py` missing), which broke `import sympy` → `import torch` → every experiment.
-Fixed with `python -m pip install --force-reinstall --no-deps mpmath==1.3.0`. Verified afterwards:
-loading an H0 checkpoint and replaying evaluation seeds 1009–1013 on `map-random-01` reproduces the
-ledger statuses exactly (`success ×5` = ledger `success ×5`).
+## 1. Repository and implementation facts
 
-| Fact asked in brief D.2 | Finding | Evidence |
-|---|---|---|
-| Obstacles per map | random 6, corridor 8, barrier 2, mixed 6 (count = max(4, round(8·density)) = 6 at density 0.8; corridor doubles it, mixed adds 2 fixed boxes) | `scripts/run_rigorous_manifest.py:104-133` (`build_map`) |
-| AABB storage | list of dicts `{'x': (x0,x1), 'y': (y0,y1), 'z': (z0,z1)}` floats | `scripts/a2c_new.py:100-101`, `_box` at `run_rigorous_manifest.py:100` |
-| Fixed padded vector feasible? | **Yes.** Max 8 obstacles over all layouts; held-out maps use the same generator/density so ≤ 8. K = 8 slots chosen. Option A (raw geometry) adopted | `build_map`; `scripts/icai2026_experiments.py:GEO_K` |
-| Training wall-clock | **2983 steps/s** per job at `OMP_NUM_THREADS=4` (probe: 100k steps in 33.5 s) ⇒ 5M steps ≈ **28 min/unit**. 20 H3 units ⇒ ~9.3 h serial, ~2–5 h wall at 6-way parallelism on 32 logical cores | probe run 2026-09-28; `nproc` = 32 |
-| Saved H0/H1 re-evaluable without retrain? | **Yes.** `run_one(..., evaluation_only=True)` loads `checkpoints/model.zip`; `wind_multiplier`/`use_wind` are constructor params; maps come from `build_map(spec)`. Verified by exact ledger replay | `scripts/a2c_new.py:252-263`; `run_rigorous_manifest.py:271-275`; replay test above |
-| APF distance & d0 location | center-distance at `scripts/a2c_new.py:200-204`; `d0` parameter default 6.0 at `:194`; normalize-then-clip at `:208-212` | `apf_action` |
-| λ implementation | `apf_w = clamp(1 − dist/300, 0.15, 0.55)` when `apf_weight is None`, else fixed `clamp(apf_weight,0,1)` | `scripts/a2c_new.py:303-307` |
-| Why 50 slots → 32 seeds | bases {1009,1013,1019,1021,1031} + episode 0..9 produce overlapping windows; union = 1009..1040 = 32 values, 18 exact repeats per unit | `experiments/rigorous_manifest.json` `evaluation.seeds`; `reproducibility/docs/seed_provenance.md` |
+- Canonical interpreter: `C:\Users\N4G\AppData\Local\Programs\Python\Python313\python.exe`
+  (torch 2.6.0+cu124, SB3 2.7.0, gymnasium 1.2.0, numpy 2.1.1). The PATH-default python 3.14 has no torch.
+- Environment repair performed during this revision: Python313 `mpmath` was corrupted
+  (missing `libmp/gammazeta.py`), breaking `import torch`; fixed by
+  `pip install --force-reinstall --no-deps mpmath==1.3.0`; verified by exact ledger replay of an H0 checkpoint.
+- Obstacles per map: random 6, corridor 8, barrier 2, mixed 6 (`build_map`, `scripts/run_rigorous_manifest.py`).
+- AABBs stored as dicts of `(x, y, z)` interval tuples; K = 8 padded slots cover every training and held-out map.
+- Measured training throughput 2983 steps/s per job at OMP=4 (≈28 min per 5M-step unit solo; 2192 steps/s and
+  ≈38 min/unit under 6-way contention). H3: 20/20 units completed, mean 2281.5 s/unit.
+- APF distance/d0: `scripts/a2c_new.py:194-212` (center basis, d0 default 6). λ: `a2c_new.py:303-307`.
+- FAIR 50→32 seed collapse: bases {1009,1013,1019,1021,1031} + episode 0..9 overlap; union 1009..1040.
 
-Checkpoints: `results/rigorous/artifacts/<run>/checkpoints/model.zip` (SB3 zip, 12-D obs for H0/H1),
-50 episode rows each in `episodes.csv`, 50 trajectory `.npz` each.
+## 2. Reviewer issue → experiment mapping (internal; must NOT appear in the manuscript)
 
-## 2. Reviewer issue → experiment/change mapping
-
-| # | Reviewer issue | Response experiment | Priority | Status |
+| # | Reviewer issue | Experiment | Priority | Status |
 |---|---|---|---|---|
-| 1 | H0−H1 confounds APF with privileged obstacle information; requested an A2C baseline WITH obstacle info and WITHOUT APF | **H3 geometry-aware A2C** (68-D obs = 12-D base + 56-D padded raw AABB geometry; no APF force, no blend) | P0 | training RUNNING |
-| 2 | H2's 55/1000 may be an artifact of center-distance + d0 = 6 | **APF sensitivity**: basis {center, surface} × d0 {4,6,8,12}, all 8 reported | P0 | DONE (aggregating) |
-| 3 | Ceiling effect on 4 fixed maps; requested held-out layouts and/or wind intensities | **wind sweep** {0,0.5,1,1.5,2} on frozen policies + **held-out maps** (4 new procedural seeds) | P0/P1 | DONE / DONE (aggregating) |
-| 4 | Adaptive vs fixed blending | Deferred (P2). If time remains: evaluation-time blend sensitivity, labelled as such, NOT a causal ablation | P2 | not started |
-| 5a | "trajectory variation" wording | manuscript wording change (section 11) | — | planned |
-| 5b | evaluation-seed pseudoreplication | **unique 50-seed schedule 2001–2050**, shared across configs; FAIR numbers kept separate | P0 | DONE (aggregating) |
-| 5c | log A2C/APF action components | **action logging** on H0 with mechanistic diagnostics only | P1 | DONE (aggregating) |
-| 5d | reproducibility | this manifest + per-run JSON/CSV + launcher scripts; parent package already 69/69 reconciled | — | DONE |
-| R2 | null results on efficiency/clearance/speed | preserved verbatim; not hidden | — | enforced in wording rules |
+| 1 | H0−H1 confounds APF with privileged obstacle information | H3 geometry-aware A2C, no APF | P0 | complete |
+| 2 | H2 baseline questionable; d0/distance sensitivity requested | basis × d0 grid, all 8 reported | P0 | complete |
+| 3 | Ceiling on 4 fixed maps; held-out / wind requested | wind sweep + same-family held-out | P0/P1 | complete |
+| 4 | Adaptive vs fixed blending | evaluation-time blend sensitivity (labelled) | P2 | complete as sensitivity; causal training ablation dropped |
+| 5 | Wording, pseudoreplication, action logs, reproducibility | unique seeds 2001–2050; step-level logs; manifest + checker | — | complete |
 
-## 3. Exact new configurations
+## 3. Configurations and the H3 representation
 
-Controller matrix (makes the asymmetry visible, per brief O):
-
-| Config | Learned? | Geometry to learned policy? | Geometry to APF? | APF analytical action? | Adaptive blend? | Budget |
+| Config | Learned? | Geometry to learned policy | Geometry to APF | APF analytical action | Adaptive blend | Budget |
 |---|---|---|---|---|---|---|
-| H0 hybrid | yes (A2C) | **no** | yes (centers) | yes | yes λ∈[0.15,0.55] | 5M/unit |
-| H1 A2C-only | yes (A2C) | **no** | no | no | no | 5M/unit |
-| H2 APF-only | no | n/a | yes (grid) | yes (grid) | n/a (weight 1) | 0 |
-| H3 A2C-Geo | yes (A2C) | **yes (68-D raw padded)** | no | no | no | 5M/unit |
+| H0 hybrid | A2C | no | centers | yes | yes | 5M/unit |
+| H1 blind | A2C | no | no | no | no | 5M/unit |
+| H2 APF-only | no | n/a | grid | yes (grid) | n/a | 0 |
+| H3 geometry-aware | A2C | yes, 68-D padded raw AABB | no | no | no | 5M/unit |
 
-H3 observation spec (Option A): per obstacle slot, sorted by distance to UAV ascending,
-`[rel_center/300 (3), half_extents/300 (3), valid (1)]`, K = 8 slots, zero-padded; concatenated after the
-12-D base vector. Raw geometry only — the APF resultant is **never** an observation.
+H3 observation = 12-D base + 56-D geometry block: K = 8 slots sorted ascending by distance from the UAV to each
+obstacle center; per slot rel_center/300 (3), half_extents/300 (3), validity mask (1); unused slots zero with
+mask 0. Raw geometry only — no APF force enters the observation. Terminology: **geometry-aware A2C baseline**;
+it is NOT "perfectly information-matched" to H0 (different representation and different computation path).
+Representation audit (section 8) documents per-timestep re-sorting and measured slot-permutation rates.
 
-## 4. Exact seed protocol
+## 4. Seed protocol (corrected)
 
-- Training seeds (H3): 101, 211, 307, 401, 503 (same labels as FAIR; new models).
-- Evaluation: `numerical_seed = base + episode`, bases {2001, 2011, 2021, 2031, 2041}, episode 0..9
-  ⇒ **50 unique seeds 2001–2050**, identical set for H0/H1/H2/H3 and for every wind scale, so pairing is meaningful.
-- Inference unit remains `(map_id, training_seed)`; rollouts are descriptive only. Wilson intervals descriptive only.
-- Seeding improvements vs FAIR: H3 additionally calls `model.set_random_seed(seed)` (explicit torch seeding).
-  Bitwise determinism is **not** claimed for FAIR models (unchanged); H3 seeding is documented per run JSON.
+Evaluation seeds = base + episode with bases {2001, 2011, 2021, 2031, 2041}, episodes 0..9 ⇒ 50 unique seeds
+(2001–2050) per unit, shared across configurations and wind scales. Training seeds 101/211/307/401/503.
+Inference unit = (map, training run); rollouts are descriptive only; Wilson intervals descriptive only;
+p-values exploratory, uncorrected, reported with exact values and Cohen's d_z. H3 additionally calls the library
+seed setter (explicit torch seeding). Bitwise determinism is not claimed for FAIR checkpoints.
 
-## 5. Runtime / training budget
+## 5. Runtime
 
-Measured 2983 steps/s per job (OMP=4). H3 = 20 units × 5M steps ≈ 9.3 h serial; launched 6-way parallel
-(`scripts/icai2026_train_h3.sh`, 24 of 32 logical cores). Frozen-policy evaluations run in a separate
-single process with OMP=4 (`scripts/icai2026_run_cheap.sh`) so they never block on H3.
+H3: 20 units × 5M steps, 6-way parallel, ≈2.3 h wall. Frozen-policy evaluations: minutes each.
+Fixed-λ sensitivity: 3 × 1000 episodes. Activation measurement: 4000 replayed episodes, evaluation-only.
 
-## 6. New results
+## 6. Master result tables (corrected; conservative interpretation)
 
-> Filled from `results/icai2026/**/*.csv` as jobs finish. FAIR numbers are reported separately and are NOT overwritten.
+### 6.1 Corrected-seed outcomes, training maps (1000 rollouts per configuration)
 
-### 6.1 Corrected-seed re-evaluation (H0/H1, wind 1.0) — DONE
-Source: `results/icai2026/icai_eval_unique/icai_eval_unique_H0_H1.csv` (50 unique seeds 2001–2050 per unit).
-
-| Config | Random | Corridor | Barrier | Mixed | Total |
+| Config | random-01 | corridor-01 | barrier-01 | mixed-01 | Total (succ/coll/timeout) |
 |---|---|---|---|---|---|
-| H0 | 250/250 | 250/250 | 250/250 | 250/250 | **1000/1000** |
-| H1 | 157/250 | 241/250 | 200/250 | 250/250 | **848/1000** (36 coll, 107 timeout) |
-| FAIR (old 32-seed schedule) | 140/250 | 240/250 | 200/250 | 250/250 | 830/1000 |
+| H0 | 250/250 | 250/250 | 250/250 | 250/250 | 1000 / 0 / 0 |
+| H3 | 233/250 | 250/250 | 222/250 | 233/250 | 938 / 62 / 0 |
+| H1 | 157/250 | 241/250 | 200/250 | 250/250 | 848 / 45 / 107 |
+| FAIR (old 32-seed schedule) | 140 | 240 | 200 | 250 | 830 / 58 / 112 |
 
-**Answer to S.1: yes.** With corrected unique seeds the H0−H1 reliability gap is −15.2 percentage points
-(mean paired difference H1−H0 = −0.152, Cohen d_z = −0.491, two-sided Wilcoxon signed-rank p = 0.0156,
-n = 20 units, 7 non-zero pairs). The gap is slightly smaller than FAIR's −17 pp (p = 0.0273) but the
-conclusion is unchanged. H1's per-unit rates on `map-random-01` remain bimodal (0.02–0.98), i.e. the
-failure structure is seed/model-dependent, not uniform.
+Arithmetic verified: 848 + 45 + 107 = 1000; 938 + 62 + 0 = 1000. (The pre-audit report carried a wrong H1
+collision total of 36; see correction log, C-1.)
 
-### 6.2 Wind stress test — DONE (frozen policies, 1000 rollouts per config x scale)
-Source: `results/icai2026/icai_wind_sweep/icai_wind_sweep_H0_H1.csv`; scale 1.0 from 6.1.
-Wind rule: the whole wind velocity vector (base + gust) is multiplied by `wind_scale` every step
-(`DroneEnv3D.wind_multiplier`); 1.0 reproduces the FAIR setting exactly.
+### 6.2 Paired unit-level contrasts (20 units; efficiency 19–20)
 
-| wind_scale | H0 success | H0 coll | H0 timeout | H1 success | H1 coll | H1 timeout |
-|---|---|---|---|---|---|---|
-| 0.0 | 1000/1000 | 0 | 0 | 845/1000 | 55 | 100 |
-| 0.5 | 1000/1000 | 0 | 0 | 837/1000 | 50 | 113 |
-| 1.0 | 1000/1000 | 0 | 0 | 848/1000 | 36 | 107 |
-| 1.5 | 995/1000 | 5 | 0 | 848/1000 | 49 | 103 |
-| 2.0 | 986/1000 | 14 | 0 | 866/1000 | 49 | 85 |
-
-**Answer to S.4 (descriptive only):** H0's ceiling breaks only at 1.5x (99.5%) and 2.0x (98.6%), and every
-failure is a collision, never a timeout. H1 is essentially FLAT and non-monotone across scales
-(84.5% -> 86.6%), i.e. H1's deficit is geometry/control-driven, not wind-driven. We may say
-"completion reliability of the hybrid degrades gracefully up to twice the training wind intensity";
-we may NOT say "robust to wind" without qualification, and no significance tests are attached to this sweep.
-
-### 6.3 APF sensitivity — DONE (all 8 predeclared settings reported; 200 rollouts each over 4 maps)
-Source: `results/icai2026/icai_apf_sensitivity/apf_sensitivity.csv`.
-
-| basis | d0 (m) | success/200 | collision | timeout | SR |
+| Contrast | metric | diff | d_z | p | reading |
 |---|---|---|---|---|---|
-| center | 4 | 21 | 172 | 7 | 0.105 |
-| center | 6 | 21 | 172 | 7 | 0.105 |
-| center | 8 | 21 | 172 | 7 | 0.105 |
-| center | 12 | 21 | 172 | 7 | 0.105 |
-| surface | 4 | 88 | 0 | 112 | 0.440 |
-| surface | 6 | 88 | 0 | 112 | 0.440 |
-| surface | 8 | 85 | 0 | 115 | 0.425 |
-| surface | 12 | 85 | 0 | 115 | 0.425 |
+| H0−H1 | success | +0.152 | +0.491 | 0.0156 | supported |
+| H0−H1 | jitter | −27.237 | −1.746 | <0.001 | supported |
+| H0−H1 | acceleration | −6.900 | −1.098 | 0.0049 | supported |
+| H0−H1 | efficiency | −0.0057 | −0.060 | 0.768 | not supported |
+| H0−H1 | clearance | −0.5627 | −0.066 | 0.927 | not supported |
+| H0−H1 | steps | −128.495 | −0.293 | 0.143 | not supported |
+| H3−H1 | success | +0.090 | +0.276 | 0.250 | not supported |
+| H3−H1 | jitter | −1.125 | −0.070 | 0.898 | not supported |
+| H3−H1 | acceleration | +1.9725 | +0.269 | 0.898 | not supported |
+| H0−H3 | success | +0.062 | +0.410 | 0.125 | not supported |
+| H0−H3 | jitter | −26.112 | −1.970 | <0.001 | supported |
+| H0−H3 | acceleration | −8.8725 | −4.076 | <0.001 | supported |
+| H0−H3 | steps | +26.865 | +1.372 | <0.001 | supported (H0 uses more steps) |
 
-**Answer to S.6: yes, largely an implementation artifact — but the corrected controller is still insufficient.**
-With center-distance the repulsive term is effectively DEAD on these maps: results are bit-identical across
-d0 = 4..12 (repulsion never activates within d0 of any box center along the flown path), and 86% of episodes
-end in collision. Switching to nearest-surface distance removes collisions ENTIRELY (0/200) and quadruples
-success (0.105 -> 0.440), but the remaining 56% of failures are timeouts: surface-based APF-only stagnates.
-Per-map detail (success of 50): surface d0=6 gives barrier 22, corridor 19, mixed 23, random 24, versus
-center d0=6 giving 6, 0, 3, 12. Conclusion for the manuscript: H2's FAIR number (55/1000) measured a broken
-distance convention, not the ceiling of potential-field guidance; APF-only remains an insufficient planner
-(stagnation), which is the claim we can defend.
+Interpretation (descriptive, not causal): the aggregate ordering is H1 < H3 < H0 in completion rate. The total
+H0−H1 contrast is supported at the paired unit level; the two intermediate contrasts are not individually
+significant. This is a **descriptive partition of the observed point-estimate gap** across obstacle-blind,
+geometry-aware, and analytical-hybrid configurations — not a causal decomposition. The strongest statistically
+supported effect associated with the analytical hybrid channel is reduced **sampled trajectory variation**
+(finite-difference jerk and acceleration), and that effect survives information matching (H0−H3 significant,
+H3−H1 null).
 
-### 6.4 Held-out maps — DONE (250 rollouts per config x map; models frozen)
-Source: `results/icai2026/icai_heldout/icai_heldout_H0_H1.csv`.
-Protocol: each held-out layout is evaluated with the model trained on the SAME-LAYOUT training map
-(e.g. random-01 model on random-ho1); H0 receives the new geometry through APF, so this is
-controller-level transfer with map geometry available, NOT obstacle-free zero-shot generalization.
+### 6.3 Wind stress test (frozen policies; 1000 rollouts per config × scale)
 
-| held-out map | H0 success | H0 coll | H1 success | H1 coll |
+| wind_scale | H0 | H3 | H1 |
+|---|---|---|---|
+| 0.0 | 1000 (0 coll) | 969 (31) | 845 (55) |
+| 0.5 | 1000 (0) | 961 (39) | 837 (50) |
+| 1.0 | 1000 (0) | 938 (62) | 848 (45) |
+| 1.5 | 995 (5) | 926 (74) | 848 (49) |
+| 2.0 | 986 (14) | 915 (85) | 866 (49) |
+
+Scaling rule: the whole wind velocity vector (base + gust) multiplied by wind_scale each step; 1.0 reproduces
+the training setting. Narrow reading: the frozen hybrid shows graceful completion degradation over the tested
+range up to 2× nominal; H3 declines monotonically; **H1 shows no monotonic degradation over the tested wind
+scaling, so increased wind magnitude alone does not explain its lower completion rate in this experiment.**
+No robustness claim beyond the tested range.
+
+### 6.4 APF-only sensitivity (200 rollouts per setting; all 8 predeclared settings)
+
+| basis | d0 (m) | success | collision | timeout |
 |---|---|---|---|---|
-| random-ho1 | 250/250 | 0 | 144/250 | 49 |
-| corridor-ho1 | 250/250 | 0 | 241/250 | 9 |
-| barrier-ho1 | 250/250 | 0 | 200/250 | 0 |
-| mixed-ho1 | **50/250** | **200** | **0/250** | **250** |
+| center | 4 / 6 / 8 / 12 | 21 each | 172 each | 7 each |
+| surface | 4 | 88 | 0 | 112 |
+| surface | 6 | 88 | 0 | 112 |
+| surface | 8 | 85 | 0 | 115 |
+| surface | 12 | 85 | 0 | 115 |
 
-**Answer to S.5: NO, not uniformly.** Transfer holds on three of four unseen families (H0 100%), but the
-unseen mixed layout collapses both controllers (H0 20%, H1 0%, all collisions). The hybrid degrades less
-catastrophically than A2C-only on that layout, but a 200/250 collision rate on one unseen family forbids any
-generalization claim. This is a headline negative result and must appear in the abstract-level limitations.
+The center-distance repulsive term was **never activated** under the evaluated trajectories (section 7), which
+explains the d0-invariance. With the surface basis, **no collisions were observed in 200 evaluated rollouts**,
+but 56–57.5% of episodes time out: APF-only remains an insufficient planner (stagnation). The FAIR H2 figure
+(55/1000) therefore measured a distance convention under which repulsion never engaged, not a property of
+potential-field guidance in general.
 
-### 6.5 H3 geometry-aware A2C — DONE (20 units trained, 5M steps each, mean 2281 s/unit)
-Sources: `results/icai2026/h3_train/` (20 checkpoints + per-run JSON),
-`results/icai2026/icai_eval_unique_h3/icai_eval_unique_h3_H3.csv`,
-`results/icai2026/icai_wind_sweep_h3/…`, `results/icai2026/icai_heldout_h3/…`.
+### 6.5 Same-family held-out layouts (250 rollouts per config × map; models frozen)
 
-Train maps, corrected seeds (success/250 per map):
+Each held-out layout is evaluated with the model trained on the training map of the same family. H0 receives
+held-out geometry through APF and H3 through its observation: this is controller-level transfer with map
+geometry available, not obstacle-free zero-shot navigation.
 
-| Config | random-01 | corridor-01 | barrier-01 | mixed-01 | Total |
-|---|---|---|---|---|---|
-| H0 | 250 | 250 | 250 | 250 | **1000/1000** |
-| H3 | 233 | 250 | 222 | 233 | **938/1000** (62 coll, 0 timeout) |
-| H1 | 157 | 241 | 200 | 250 | **848/1000** |
+| held-out map | H0 | H3 | H1 |
+|---|---|---|---|
+| random-ho1 | 250/250 (100.0%) | 203/250 (81.2%) | 144/250 (57.6%) |
+| corridor-ho1 | 250/250 (100.0%) | 250/250 (100.0%) | 241/250 (96.4%) |
+| barrier-ho1 | 250/250 (100.0%) | 222/250 (88.8%) | 200/250 (80.0%) |
+| mixed-ho1 | **50/250 (20.0%)** | **17/250 (6.8%)** | **0/250 (0.0%)** |
 
-Paired inference on 20 (map, seed) units (corrected seeds):
+Transfer is strongly layout-dependent. The mixed-family collapse (all failures collisions, despite 233–250/250
+on the training mixed map) rules out any generalization claim and is retained as a headline negative result.
 
-| Contrast | Success diff | d_z | p | Jitter diff | d_z | p |
-|---|---|---|---|---|---|---|
-| H3 − H1 | +0.090 | +0.276 | 0.250 | −1.13 | −0.07 | 0.898 |
-| H0 − H3 | +0.062 | +0.410 | 0.125 | −26.11 | −1.97 | <0.001 |
-| H0 − H1 | +0.152 | +0.491 | 0.016 | −27.24 | −1.75 | <0.001 |
-
-**Answers S.2 / S.3.** The 15.2-pp H0−H1 reliability gap decomposes additively into +9.0 pp associated with
-obstacle information (H3−H1) and +6.2 pp associated with the analytic APF channel (H0−H3); **neither component
-is individually significant at n = 20**, only the total is. By contrast, the trajectory-variation benefit does
-NOT decompose this way: H0−H3 jitter/acceleration remain large and highly significant (d_z −1.97 / −4.08)
-while H3−H1 is null (d_z −0.07 / +0.27, p ≈ 0.90). Interpretation: obstacle awareness accounts for most of the
-point-estimate reliability gain, whereas the distinctive, statistically supported contribution of the analytic
-channel is damping of sampled trajectory variation. H3 failures are 100% collisions (0 timeouts), a different
-failure signature from the timeout-heavy barrier/random profile of H1.
-
-### 6.6 Action-component diagnostics — DONE (H0, 1000 episodes, step-level logs)
-Source: `results/icai2026/icai_action_log/icai_action_log_H0.csv`. Mechanistic diagnostics only.
-
-| diagnostic (per-episode mean of step values) | mean | sd |
-|---|---|---|
-| ‖a_A2C‖ | 1.458 | 0.132 |
-| ‖a_APF‖ | 0.0400 | 0.0000 |
-| λ_t | 0.375 | 0.029 (episode-mean range 0.324–0.463) |
-| cosine(a_A2C, a_APF) | 0.545 | 0.054 |
-| ‖Δ blended action‖ per step | 0.130 | 0.031 |
-
-Key mechanistic observation: ‖a_APF‖ equals the attractive gain k_att = 0.04 with zero variance, i.e. during
-successful H0 flights the repulsive term essentially never activates (consistent with 6.3: center-distance
-repulsion is dead on these maps). The APF channel therefore contributes a small, steady, goal-directed bias
-blended at λ ≈ 0.37, moderately aligned with the policy action (cosine 0.55). This is consistent with — but
-does not prove — the hypothesis that the channel damps abrupt policy commands; a causal claim would require
-the fixed-lambda / no-attraction ablations that remain out of scope.
-
-### 6.7 Evaluation-time blend sensitivity (fixed λ) — DONE, labelled as sensitivity not causal ablation
-Source: `results/icai2026/icai_fixed_lambda_0.15|0.35|0.55/…csv`. Frozen H0 policies (trained under the
-adaptive schedule) re-evaluated with a constant blend weight:
+### 6.6 Evaluation-time blend sensitivity (fixed λ; frozen H0 policies)
 
 | blend | success/1000 | collision | timeout | corridor success/250 |
 |---|---|---|---|---|
 | adaptive (as trained) | 1000 | 0 | 0 | 250 |
-| fixed λ = 0.15 | 990 | 6 | 4 | 246 |
-| fixed λ = 0.35 | 795 | 157 | 48 | 172 |
-| fixed λ = 0.55 | 606 | 390 | 4 | **0** |
+| fixed 0.15 | 990 | 6 | 4 | 246 |
+| fixed 0.35 | 795 | 157 | 48 | 172 |
+| fixed 0.55 | 606 | 390 | 4 | 0 |
 
-Monotone degradation with constant weight, and total corridor collapse at λ = 0.55, indicate that the
-distance-adaptive schedule matters at deployment time. Because the policies were trained under the adaptive
-schedule, this is **evaluation-time blend sensitivity**, not a causal ablation of adaptive blending (brief K).
+Label: **evaluation-time blend sensitivity**. Policies were trained under the adaptive schedule, so this is not
+a causal ablation of adaptive blending; it supports only the narrower observation that deployment-time behavior
+is sensitive to the blend weight.
 
-## 7. Statistical analysis plan (predeclared)
+### 6.7 Action-component diagnostics (H0, 1000 episodes, step-level)
 
-- H0−H1, H0−H3, H3−H1: two-sided Wilcoxon signed-rank on the 20 `(map, seed)` units; Cohen d_z; exact p.
-- Efficiency paired on units with successes in both arms (n reported per metric).
-- Wind sweep and held-out: descriptive per-config curves and per-map/per-model summaries; no post-hoc test family.
-- No multiplicity correction is applied; all six-plus component metrics are labelled exploratory, as in FAIR.
-- No metric shopping: every predeclared metric is reported for every predeclared configuration.
+| diagnostic | mean | sd |
+|---|---|---|
+| ‖a_A2C‖ | 1.4582 | 0.1321 |
+| ‖a_APF‖ | 0.0400 | 0.0000 |
+| λ_t | 0.3746 | 0.0293 |
+| cosine(a_A2C, a_APF) | 0.5452 | 0.0542 |
+| ‖Δ blended‖ per step | 0.1299 | 0.0312 |
 
-## 8. Unexpected / negative results
+‖a_APF‖ equals the attractive gain k_att = 0.04 with zero variance: on successful H0 flights the analytical
+channel contributes a steady goal-directed bias; the repulsive component contributes nothing measurable
+(confirmed directly in section 7).
 
-- **Held-out mixed family collapses every controller**: mixed-ho1 gives H0 50/250, H3 17/250, H1 0/250, all
-  collisions, although all three reach 233–250/250 on the TRAINING mixed map. A single unseen layout family
-  therefore invalidates any generalization claim; reported as a headline limitation.
-- **Center-distance repulsion is dead on the evaluated maps**: APF-only results are identical for
-  d0 = 4/6/8/12 (21/200), i.e. the repulsive term never activates; the FAIR H2 number measured a broken
-  distance convention. Nearest-surface APF removes all collisions (0/200) but times out in 56% of episodes.
-- **H3 does not significantly beat H1 on success** (p = 0.250) despite a +9 pp point estimate; the reliability
-  decomposition is therefore reported as point estimates with explicit non-significance.
-- **Fixed-λ deployment collapses corridor performance** (0/250 at λ = 0.55) even though the same policies reach
-  250/250 under the adaptive schedule.
-- All FAIR null results (efficiency, clearance, steps) are carried forward unchanged.
-- Environment corruption (mpmath) discovered and fixed; recorded because it blocked all computation.
+## 7. APF repulsion activation — direct measurement (brief F)
 
-## 9. Claims now supported / still unsupported
+Method: evaluation-only replay of frozen controllers; at every timestep the repulsive vector is recomputed for
+the stated basis at d0 = 6 m and flagged active when ‖F_rep‖ > ε with ε = 1e-8 (a looser threshold at 1% of
+k_att, 4e-4, gives the same zeros for the center basis). Source: `results/icai2026/apf_activation.json`,
+script `scripts/icai2026_apf_activation.py`.
+
+| group | timesteps | active | fraction | episodes with ≥1 activation |
+|---|---|---|---|---|
+| H0 trajectories, center basis | 103,682 | 0 | 0.000 | 0 / 1000 |
+| H0 successful timesteps, center | (subset) | 0 | 0.000 | — |
+| H2 trajectories, center basis | 475,015 | 0 | 0.000 | 0 / 1000 |
+| H2 trajectories, surface basis | 1,324,280 | 404,615 | 0.3055 | 945 / 1000 |
+| H0 trajectories, surface basis (COUNTERFACTUAL) | 103,682 | 2,103 | 0.0203 | 549 / 1000 |
+
+Per-map and per-seed rates are in the JSON (all zero for the center basis). Conclusion, stated at the measured
+strength: **the center-distance repulsive term was never activated under the evaluated trajectories**, on both
+H0 and H2 paths; the surface-distance variant activates on ~30.6% of H2 timesteps and would have activated on
+~2.0% of H0 timesteps (54.9% of episodes) had it been the shipped basis. The hybrid's nominal-map behavior is
+therefore driven by its attractive bias and adaptive weighting, not by obstacle repulsion. The label
+"A2C–APF obstacle-avoidance hybrid" overstates what the APF channel does on these maps: it is an
+attractive-bias guidance channel whose repulsion is inactive under the evaluated geometry and trajectories.
+
+## 8. H3 representation audit (brief G)
+
+Source: `results/icai2026/h3_representation_audit.json`, script `scripts/icai2026_h3_audit.py`.
+- K = 8; slot = [rel_center/300 (3), half_extents/300 (3), valid (1)]; zero padding with valid = 0;
+  sorting by distance to obstacle center, ascending; re-sorted at every timestep (computed inside `_obs`).
+- All training and held-out maps have ≤ 8 obstacles (max 8, corridor), so no obstacle is ever dropped and no
+  K-boundary truncation occurs; slot changes are within-top-K permutations.
+- Observation space is `Box(-inf, +inf, (68,))`; SB3 MlpPolicy does not normalize inputs. Measured component
+  ranges per map are in the JSON (rel-center components within ±1.12, extents ≤ 0.07, mask ∈ {0,1}).
+- Slot-permutation (discontinuity) rates over replayed H3 episodes: random-01 16.5%, corridor-01 18.6%,
+  barrier-01 3.0%, mixed-01 16.8% of compared timesteps. Because the MLP is not permutation-invariant, the
+  observation is discontinuous when two obstacle distances cross. This is a representation artifact, not a
+  physical event.
+- Threat-to-validity statement: H3 is a geometry-aware A2C baseline whose observation is permutation-discontinuous
+  at distance crossings and whose geometry encoding differs from H0's analytic center-distance channel; H0−H3
+  contrasts therefore compare different representations as well as different controllers. No retraining was
+  performed for this audit, per the brief.
+
+## 9. Statistical analysis plan (predeclared, unchanged)
+
+Paired two-sided Wilcoxon signed-rank on (map, training-run) units; Cohen's d_z; exact p; efficiency paired on
+units with successes in both arms; wind and held-out suites descriptive only; no post-hoc test families;
+no multiplicity correction (labelled exploratory); no metric shopping.
+
+## 10. Correction log
+
+| ID | old value | corrected value | source artifact | reason |
+|---|---|---|---|---|
+| C-1 | H1 corrected-seed collisions = 36 (report 6.1 total) | 45 | `icai_eval_unique/icai_eval_unique_H0_H1.csv` | 36 is the random-map-only collision count; it was promoted to the total during manual table entry. Per-map values were already correct (36+9+0+0 = 45). |
+| C-2 | "H3 89–100%" on non-collapsed held-out families | 81.2–100.0% (203/250, 250/250, 222/250) | `icai_heldout_h3/icai_heldout_h3_H3.csv` | 203/250 = 81.2%, not 89%; range mis-stated in pre-audit section 13. |
+| C-3 | statuses "RUNNING / DONE (aggregating) / PENDING" | final states (complete) | job logs + CSV presence | stale labels left from the execution phase. |
+| C-4 | "decomposes additively", "accounts for most", "59%" | descriptive partition language; components labelled non-significant | paired stats in MASTER_RESULTS.json | wording overstated causal separation. |
+| C-5 | "broken distance convention", "removes collisions entirely" | "repulsive term never activated under the evaluated trajectories"; "no collisions observed in 200 evaluated rollouts" | `apf_activation.json`, sensitivity CSV | mechanism now directly measured; guarantee-language removed. |
+| C-6 | "H1 deficit is geometry/control-driven, not wind-driven" | "H1 shows no monotonic degradation over the tested wind scaling…" | wind CSV | causal inference from a non-monotonic descriptive trend. |
+| C-7 | "same-layout held-out maps" | "same-family held-out layouts" | manifest map specs | held-out maps are new layouts from the same family. |
+
+Downstream occurrences of C-1: pre-audit report §6.1 total row only (manuscript table already used 45).
+Downstream occurrences of C-2: pre-audit report §13 answer 5 only. Both fixed in this document; the manuscript
+never contained either wrong value but does contain wording items C-4..C-7 (see removal/rewrite checklist).
+
+## 11. Consistency checker
+
+`python scripts/icai2026_consistency_check.py` recomputes every headline number from raw CSVs, checks
+success+collision+timeout = n per group and per-map sums = totals, 50-unique-seed accounting per unit, paired
+statistics against `stats_icai.json`, action-log summaries, activation zeros, and scans report+manuscript for
+stale status, arithmetic, causal-overreach, APF/wind/held-out wording, and FAIR mentions. Current status:
+**150 PASS / 0 FAIL**; warnings list = the wording/removal items tracked in sections 10 and 17.
+
+## 12. Supported / unsupported / negative-null
 
 Supported (under the evaluated simulator and protocol):
-- With corrected unique seeds, the hybrid completes more rollouts than obstacle-blind A2C (−15.2 pp, p = 0.016).
-- Most of that reliability point-estimate is associated with obstacle information available to the controller
-  (H3 recovers +9.0 pp of it); the residual analytic-channel reliability increment (+6.2 pp) is NOT significant.
-- The statistically supported contribution of the analytic channel is lower sampled trajectory variation
-  (H0−H3 jitter d_z = −1.97, accel d_z = −4.08, p < 0.001), and this is NOT explained by obstacle information
-  (H3−H1 null).
-- Frozen-hybrid reliability degrades gracefully up to twice the training wind intensity (98.6% at 2.0x).
-- APF-only failure in FAIR was largely an implementation artifact (center distance); surface-based APF-only
-  still stagnates (44% success, 0 collisions).
-- The adaptive blend schedule matters at deployment time (evaluation-time sensitivity).
+- H0 > H1 completion on corrected seeds (−15.2 pp, p = 0.0156) and lower sampled trajectory variation (p < 0.001).
+- The variation effect survives information matching (H0−H3 significant; H3−H1 null).
+- Graceful frozen-hybrid degradation to 2× nominal wind; deployment-time blend sensitivity.
+- Center-distance repulsion inactive on evaluated trajectories (direct measurement); surface basis changes H2's
+  failure mode from collision to stagnation.
+Unsupported:
+- Any causal claim that obstacle information or the analytic channel alone improves reliability (components ns).
+- Generalization (mixed-family collapse); physical flyability; superiority over PPO/SAC/RRT; efficiency/clearance/steps gains.
+Negative-null results retained visibly: H3−H1 null variation; H0−H3 ns success; held-out mixed collapse;
+H2 surface stagnation; fixed-λ corridor collapse; all FAIR nulls (efficiency, clearance, steps).
 
-Still unsupported (and stated as such):
-- Any claim that APF computation alone improves completion reliability (residual ns at n = 20).
-- Generalization to unseen layouts (mixed-ho1 collapse).
-- Physical flyability, actuator feasibility, comfort (finite-difference metrics only).
-- Causal attribution of variation damping to the blend (no fixed-λ training ablation; P2 dropped).
-- Superiority over PPO/SAC/RRT; shorter, clearer or faster successful paths.
+## 13. Threats to validity
 
-## 10. Remaining threats to validity
+Information/representation mismatch (H0 analytic centers vs H3 padded raw boxes); permutation-discontinuous H3
+observation; held-out transfer supplies geometry to H0/H3 channels; wind sweep is a one-factor stress test;
+point-mass dynamics and 1-m altitude slab; finite-difference variation metrics are not actuator/comfort measures;
+success-only efficiency/clearance survivor composition; exploratory uncorrected p-values; retraining not bitwise
+reproducible; n = 20 units limits power for the intermediate contrasts (the non-significance of H3−H1 and H0−H3
+may reflect power, not absence of effect — stated as such, never as evidence of equality).
 
-- H3's padded geometry is a different representation than APF's center distances: H0−H3 still differs in HOW
-  geometry enters (analytic channel vs learned features); H3−H1 isolates obstacle information, H0−H3 isolates
-  the analytic channel given geometry-aware learning only indirectly. Interpretation must state this.
-- Held-out evaluation gives H0 the new geometry through APF: controller-level transfer, not obstacle-free generalization.
-- Wind sweep scales the whole wind vector (base + gust) with one factor; it is a stress test, not a calibrated turbulence study.
-- Point-mass dynamics, 1-m altitude slab, finite-difference trajectory-variation metrics: unchanged from FAIR.
-- H3 with 5 seeds × 5M steps matches FAIR budget; if any unit fails to finish before deadline, H3 is downgraded to
-  3 seeds and labelled an exploratory matched-information ablation (brief E).
+## 14. Story memo (brief N)
 
-## 11. Manuscript wording recommendation (draft, to finalize with results)
+1. FAIR claim: an APF-informed guidance channel inside a fixed A2C controller increased completion reliability
+   and reduced sampled trajectory variation versus obstacle-blind A2C, with the information asymmetry disclosed.
+2. Correct confound: H0−H1 mixed the analytic channel with privileged obstacle geometry.
+3. H3 establishes: a geometry-aware, APF-free baseline sits between H1 and H0 in completion rate; obstacle
+   information is associated with most of the point-estimate gap; the variation benefit of the hybrid survives
+   information matching.
+4. H3 does NOT establish: a significant reliability increment for either ingredient alone; causal attribution;
+   equivalence of representations.
+5. Strongest statistically supported new finding: H0−H3 reduction in sampled trajectory variation
+   (jitter d_z = −1.97, acceleration d_z = −4.08, p < 0.001) with H3−H1 null — plus the direct measurement that
+   center-distance repulsion never activates.
+6. Mechanism of H0 on nominal maps: a steady attractive bias (‖a_APF‖ = k_att exactly) blended adaptively;
+   repulsion inactive; deployment behavior sensitive to λ.
+7. The label "A2C–APF obstacle-avoidance hybrid" is inaccurate for the nominal maps: avoidance (repulsion) does
+   not engage; what engages is attraction plus adaptive weighting.
+8. Surface-distance sensitivity reinterprets old H2: its collision catastrophe was a distance-convention artifact;
+   with surface distance APF-only stops colliding but stagnates — APF-alone remains insufficient.
+9. Wind sweep establishes narrowly: graceful frozen-hybrid degradation to 2× nominal; nothing about H1's deficit
+   cause; nothing beyond the tested range.
+10. Held-out mixed failure rules out layout generalization for all three controllers.
+11. Nulls that must stay visible: component non-significance; H3−H1 variation null; mixed collapse; surface
+    stagnation; fixed-λ collapse; FAIR efficiency/clearance/steps nulls.
+12. Smallest defensible contribution set: (i) geometry-aware baseline + corrected-seed protocol; (ii) direct
+    activation measurement showing the shipped repulsion is inactive; (iii) variation effect surviving
+    information matching; (iv) sensitivity/held-out/wind evidence bounding all claims.
 
-- Use "sampled trajectory variation", never "physical stability".
-- H3 completed robustly (20 units, full 5M budget) and the decomposition was measured, so the title
-  **"Disentangling Obstacle Information and APF Guidance in Hybrid A2C-APF UAV Navigation under Wind"** is used.
-- The honest headline is: most of the reliability point-estimate is associated with obstacle information
-  (neither component significant alone), while the statistically supported contribution of the analytic channel
-  is reduced sampled trajectory variation.
-- H4 removed as a named configuration; one-line note at most.
-- Controller matrix table (section 3) goes into the paper verbatim.
+## 15. Three candidate framings (brief O)
 
-## 13. Answers to the final scientific questions (brief S)
+A. Information-asymmetry / geometry-aware comparison. Question: how much of hybrid reliability is associated
+with obstacle information? Evidence: H0/H1/H3 triangle. Strongest claim: descriptive partition with a
+significant total and non-significant components. Limitation: components under-powered at n = 20; representation
+mismatch. Interesting: rare matched-information ablation in RL navigation. Reviewer risk: "your headline
+decomposition is not significant".
+B. Empirical audit of hybrid RL + analytical guidance. Question: what does each ingredient of a shipped hybrid
+actually do under measurement? Evidence: activation measurement (repulsion never fires), blend sensitivity,
+variation effect surviving matching, sensitivity grid, held-out collapse. Strongest claim: the analytic channel's
+measured contribution on nominal maps is an attractive bias plus adaptive weighting, and its statistically
+supported benefit is reduced sampled trajectory variation. Limitation: single simulator family; audit is
+descriptive by design. Interesting: implementation-level auditing is exactly the reproducibility critique line
+(Henderson 2018) and is rare in UAV RL. Reviewer risk: "audit without a positive methodological contribution" —
+mitigated by the protocol/checker artifacts.
+C. Failure-mechanism / APF-distance-semantics study. Question: why does APF-only fail, and which convention
+matters? Evidence: d0-invariance, zero center activation, surface zero-collision/stagnation, mixed-family
+collapse. Strongest claim: distance semantics, not gain tuning, determine APF-only failure mode. Limitation:
+narrow; says little about the hybrid. Interesting: clean mechanistic result. Reviewer risk: "incremental,
+known APF weakness".
+Recommendation: **B**, with A as its experimental spine and C as a results subsection. B matches what the data
+actually support at significance level, minimizes claim stretching, keeps all negatives visible, and fits ICAI
+topics (AI applications; autonomous systems) as a rigorous empirical study with reusable audit artifacts.
 
-1. **H0−H1 with corrected unique seeds?** Yes: −15.2 pp, d_z = −0.491, Wilcoxon p = 0.0156 (n = 20).
-2. **How much does H3 recover relative to H1?** +9.0 pp point estimate (59% of the gap), d_z = 0.276, p = 0.250 — not significant.
-3. **Incremental benefit of APF beyond sensing?** Reliability: +6.2 pp, p = 0.125 — not significant.
-   Trajectory variation: yes, large and significant (jitter d_z = −1.97, accel d_z = −4.08, p < 0.001), with H3−H1 null.
-4. **H0 outside default wind?** Yes, gracefully: 100 / 100 / 99.5 / 98.6% at scales 0 / 0.5–1.0 / 1.5 / 2.0;
-   H3 declines more (96.9 → 91.5%), H1 flat.
-5. **Reliability on unseen layouts?** On 3 of 4 families yes (H0 100%, H3 89–100%); on mixed-ho1 no (H0 20%, H3 7%, H1 0%).
-6. **APF-only sensitivity to d0 and distance basis?** d0 irrelevant under center distance (identical 21/200 for 4–12 m);
-   basis decisive: surface removes all collisions and quadruples success (88/200) but leaves 56% timeouts.
-7. **Reviewer status:** #1 resolved (H3 + decomposition); #2 resolved (full grid reported); #3 mitigated
-   (wind sweep + held-out; the ceiling on train maps remains for H0); #4 addressed as evaluation-time sensitivity
-   (causal training ablation remains open, P2 dropped); #5 resolved (unique seeds, action logs,
-   "trajectory variation" wording, reproducibility manifest).
+## 16. Title audit (brief P)
 
-## 12. Reproducible commands
+Current: "Disentangling Obstacle Information and APF Guidance in Hybrid A2C–APF UAV Navigation under Wind".
+Reasons to retain: matches the three-way design; signals the matched-information contribution; keywords align
+with ICAI topics. Reasons to soften: "disentangling" implies achieved causal separation, while the reliability
+components are non-significant and H0/H3 consume geometry through different representations; the word invites
+exactly the overclaim objection the audit removed elsewhere. Alternatives:
+1. "An Empirical Audit of Obstacle Information and Analytical Guidance in Hybrid A2C–APF UAV Navigation under Wind"
+2. "What Does the Analytical Channel Do? A Geometry-Aware Evaluation of Hybrid A2C–APF UAV Guidance under Wind"
+3. "Component and Information Ablations for Hybrid A2C–APF UAV Guidance: Reliability, Trajectory Variation, and Failure Mechanisms"
+4. "Reliability and Sampled Trajectory-Variation Effects of an APF Guidance Channel in Wind-Perturbed UAV Navigation"
+5. "Geometry-Aware Baselines for Auditing Hybrid Reinforcement-Learning UAV Guidance under Wind"
+Direction: 1 or 3 (audit vocabulary, no causal separation implied, no novelty language).
 
-See `experiments/icai2026_manifest.json` → `commands`, plus launchers
-`scripts/icai2026_train_h3.sh` and `scripts/icai2026_run_cheap.sh`.
-Logs: `results/icai2026/logs/h3_train.log`, `results/icai2026/logs/cheap.log`.
+## 17. Manuscript rewrite checklist (execute only after approval)
+
+1. Remove FAIR/reviewer/revision sentences: `main.tex` lines 66, 68, 70 (intro paragraph 2) — full list in
+   `consistency_check.json` under `fair_mentions_in_manuscript`.
+2. Replace causal wording: line 302 ("accounts for most…") → descriptive-partition phrasing; line 252
+   ("removes collisions entirely") → "no collisions were observed in 200 evaluated rollouts"; line 278
+   ("same-layout training map") → "training map of the same layout family"; line 232 wind sentence → the
+   no-monotonic-degradation phrasing.
+3. Insert activation-rate results (section 7 of this report) as a results subsection; relabel the APF channel's
+   nominal-map role (attractive bias + adaptive weighting).
+4. Insert H3 representation threat (permutation discontinuity, representation mismatch).
+5. Pull every number from `MASTER_RESULTS.json`; re-run the checker after edits; verify ≤ 8 pages.
+6. Adopt title direction 1 or 3; keep H4 removal note; keep all null results.
+
+## 18. GO / NO-GO gate
+
+**READY_FOR_MANUSCRIPT_REWRITE = YES.**
+- Canonical headline numbers: H0 1000/1000, H3 938/1000, H1 848/1000 (corrected seeds); H0−H1 success +0.152
+  (d_z 0.491, p 0.0156); H3−H1 +0.090 (p 0.250); H0−H3 +0.062 (p 0.125); H0−H3 jitter −26.11 (d_z −1.97,
+  p < 0.001) and acceleration −8.87 (d_z −4.08, p < 0.001); H3−H1 variation null; activation 0/103,682 (H0 center);
+  wind 100/100/100/99.5/98.6% (H0); held-out mixed 50/17/0 per 250; fixed-λ 990/795/606.
+- Chosen framing: B (empirical audit), with A as experimental spine, C as subsection.
+- Claim hierarchy: (1) variation effect surviving information matching; (2) direct activation measurement;
+  (3) descriptive reliability ordering with significant total only; (4) bounded stress-test evidence;
+  (5) all nulls visible.
+- Title direction: audit vocabulary (alternative 1 or 3); current "Disentangling…" title to be softened.
+- FAIR paper sections to retain: simulator/dynamics/reward specification, metric definitions, statistical
+  protocol discipline, threats-to-validity style. To replace: abstract, intro framing, results narrative,
+  discussion (all rewritten around the audit). ICAI draft sections to discard: intro paragraph 2 (rebuttal
+  voice), any "disentangling/causal decomposition" phrasing, the H3 "89–100%" style summaries.
+No manuscript rewrite is performed in this phase; awaiting explicit approval.
+
+## Appendix — commands and inventory
+
+Recompute everything: `python scripts/icai2026_consistency_check.py` (also rewrites MASTER_RESULTS.json).
+Activation: `python scripts/icai2026_apf_activation.py`. H3 audit: `python scripts/icai2026_h3_audit.py`.
+Figures: `python scripts/icai2026_figures.py`. Raw suites: `results/icai2026/icai_*/`.
+Tables: `results/icai2026/tables/`. Logs: `results/icai2026/logs/`.
