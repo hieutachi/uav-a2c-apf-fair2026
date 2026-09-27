@@ -1,0 +1,20 @@
+{
+  "run_id": "H3_A2C_map-corridor-01_seed503_steps5000000",
+  "hypothesis": "H3",
+  "variant": "geometry_aware_a2c_no_apf",
+  "observation": "12-D base + 56-D padded raw AABB geometry (K=8, distance-sorted)",
+  "obs_dim": 68,
+  "map": {
+    "id": "map-corridor-01",
+    "seed": 7013,
+    "layout": "corridor",
+    "distance_m": 300,
+    "density": 0.8
+  },
+  "train_seed": 503,
+  "steps": 5000000,
+  "training_seconds": 2565.5387408999995,
+  "throughput_steps_s": 1948.908398961063,
+  "started_utc": "2026-09-27T18:59:48.954891+00:00",
+  "seeding": "random+numpy+vecenv+model.set_random_seed(seed); torch via SB3 set_random_seed"
+}

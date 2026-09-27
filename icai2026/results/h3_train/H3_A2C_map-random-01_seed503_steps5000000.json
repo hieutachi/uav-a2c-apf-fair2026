@@ -1,0 +1,20 @@
+{
+  "run_id": "H3_A2C_map-random-01_seed503_steps5000000",
+  "hypothesis": "H3",
+  "variant": "geometry_aware_a2c_no_apf",
+  "observation": "12-D base + 56-D padded raw AABB geometry (K=8, distance-sorted)",
+  "obs_dim": 68,
+  "map": {
+    "id": "map-random-01",
+    "seed": 7001,
+    "layout": "random",
+    "distance_m": 300,
+    "density": 0.8
+  },
+  "train_seed": 503,
+  "steps": 5000000,
+  "training_seconds": 2452.6402615000006,
+  "throughput_steps_s": 2038.6193925325476,
+  "started_utc": "2026-09-27T18:16:53.452289+00:00",
+  "seeding": "random+numpy+vecenv+model.set_random_seed(seed); torch via SB3 set_random_seed"
+}

@@ -1,0 +1,176 @@
+{
+  "suites": {
+    "corrected_unique_seeds": 2000,
+    "h3_unique_seeds": 1000,
+    "wind_sweep": 8000,
+    "wind_sweep_h3": 4000,
+    "heldout": 2000,
+    "heldout_h3": 1000,
+    "apf_sensitivity": 1600,
+    "action_log": 1000
+  },
+  "paired": [
+    {
+      "contrast": "H0-H1",
+      "metric": "success",
+      "n_pairs": 20,
+      "n_nonzero": 7,
+      "mean_diff": 0.152,
+      "cohen_dz": 0.4913975701062781,
+      "wilcoxon_p": 0.015625
+    },
+    {
+      "contrast": "H0-H1",
+      "metric": "jitter_index",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": -27.236852046767943,
+      "cohen_dz": -1.7456391830080373,
+      "wilcoxon_p": 1.9073486328125e-06
+    },
+    {
+      "contrast": "H0-H1",
+      "metric": "acceleration_index",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": -6.900033540679279,
+      "cohen_dz": -1.097504717461266,
+      "wilcoxon_p": 0.00485992431640625
+    },
+    {
+      "contrast": "H0-H1",
+      "metric": "path_efficiency",
+      "n_pairs": 19,
+      "n_nonzero": 19,
+      "mean_diff": -0.005748391524331036,
+      "cohen_dz": -0.0604014951719427,
+      "wilcoxon_p": 0.76800537109375
+    },
+    {
+      "contrast": "H0-H1",
+      "metric": "min_obstacle_distance_m",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": -0.5626757073279565,
+      "cohen_dz": -0.06587491564763372,
+      "wilcoxon_p": 0.9272785186767578
+    },
+    {
+      "contrast": "H0-H1",
+      "metric": "steps",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": -128.49500000000003,
+      "cohen_dz": -0.29296666611970895,
+      "wilcoxon_p": 0.14290618896484375
+    },
+    {
+      "contrast": "H3-H1",
+      "metric": "success",
+      "n_pairs": 20,
+      "n_nonzero": 9,
+      "mean_diff": 0.09,
+      "cohen_dz": 0.27550416490617174,
+      "wilcoxon_p": 0.25
+    },
+    {
+      "contrast": "H3-H1",
+      "metric": "jitter_index",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": -1.1250342345281457,
+      "cohen_dz": -0.0699118392592011,
+      "wilcoxon_p": 0.8983173370361328
+    },
+    {
+      "contrast": "H3-H1",
+      "metric": "acceleration_index",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": 1.9725008946874696,
+      "cohen_dz": 0.269417702416769,
+      "wilcoxon_p": 0.8983173370361328
+    },
+    {
+      "contrast": "H3-H1",
+      "metric": "path_efficiency",
+      "n_pairs": 19,
+      "n_nonzero": 19,
+      "mean_diff": -0.00801090269510198,
+      "cohen_dz": -0.08648945991680314,
+      "wilcoxon_p": 0.9217147827148438
+    },
+    {
+      "contrast": "H3-H1",
+      "metric": "min_obstacle_distance_m",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": -0.53477808138932,
+      "cohen_dz": -0.05270634749863046,
+      "wilcoxon_p": 0.5458755493164062
+    },
+    {
+      "contrast": "H3-H1",
+      "metric": "steps",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": -155.36,
+      "cohen_dz": -0.3559871909136176,
+      "wilcoxon_p": 0.1230926513671875
+    },
+    {
+      "contrast": "H0-H3",
+      "metric": "success",
+      "n_pairs": 20,
+      "n_nonzero": 4,
+      "mean_diff": 0.06200000000000001,
+      "cohen_dz": 0.41007526635291625,
+      "wilcoxon_p": 0.125
+    },
+    {
+      "contrast": "H0-H3",
+      "metric": "jitter_index",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": -26.1118178122398,
+      "cohen_dz": -1.97048413831205,
+      "wilcoxon_p": 3.814697265625e-06
+    },
+    {
+      "contrast": "H0-H3",
+      "metric": "acceleration_index",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": -8.872534435366749,
+      "cohen_dz": -4.075514823154966,
+      "wilcoxon_p": 1.9073486328125e-06
+    },
+    {
+      "contrast": "H0-H3",
+      "metric": "path_efficiency",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": 0.0026914197165303854,
+      "cohen_dz": 0.03439710595205062,
+      "wilcoxon_p": 0.8123550415039062
+    },
+    {
+      "contrast": "H0-H3",
+      "metric": "min_obstacle_distance_m",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": -0.027897625938636317,
+      "cohen_dz": -0.0031709699884259544,
+      "wilcoxon_p": 0.8408222198486328
+    },
+    {
+      "contrast": "H0-H3",
+      "metric": "steps",
+      "n_pairs": 20,
+      "n_nonzero": 20,
+      "mean_diff": 26.865,
+      "cohen_dz": 1.3716022713033018,
+      "wilcoxon_p": 3.814697265625e-06
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+diagnostic,n_episodes,mean,sd,min,max
+log_a2c_norm,1000,1.4582,0.1322,1.0547,1.6665
+log_apf_norm,1000,0.04,0.0,0.04,0.04
+log_lambda_mean,1000,0.3746,0.0293,0.3237,0.4633
+log_cosine_mean,1000,0.5452,0.0542,0.3088,0.7001
+log_blend_change_mean,1000,0.1299,0.0312,0.0684,0.2657

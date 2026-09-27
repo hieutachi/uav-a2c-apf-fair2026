@@ -1,0 +1,20 @@
+{
+  "run_id": "H3_A2C_map-barrier-01_seed307_steps5000000",
+  "hypothesis": "H3",
+  "variant": "geometry_aware_a2c_no_apf",
+  "observation": "12-D base + 56-D padded raw AABB geometry (K=8, distance-sorted)",
+  "obs_dim": 68,
+  "map": {
+    "id": "map-barrier-01",
+    "seed": 7019,
+    "layout": "barrier",
+    "distance_m": 300,
+    "density": 0.8
+  },
+  "train_seed": 307,
+  "steps": 5000000,
+  "training_seconds": 1946.0301790000012,
+  "throughput_steps_s": 2569.3332271801305,
+  "started_utc": "2026-09-27T19:22:06.708157+00:00",
+  "seeding": "random+numpy+vecenv+model.set_random_seed(seed); torch via SB3 set_random_seed"
+}

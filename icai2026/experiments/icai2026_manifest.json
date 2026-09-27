@@ -1,0 +1,92 @@
+{
+  "$schema": "./rigorous_manifest.schema.json",
+  "manifest_version": "1.0.0",
+  "protocol_id": "icai-fai-2026-revision",
+  "declared_utc": "2026-09-28T00:40:00Z",
+  "declared_before_results": true,
+  "parent_protocol": "vnict-rigorous-2026",
+  "output_root": "results/icai2026",
+  "frozen_parent_artifacts": "results/rigorous/ (read-only for this protocol)",
+  "configurations": [
+    {
+      "id": "H0", "role": "primary", "policy_mode": "hybrid", "learned": true,
+      "obs": "12-D [pos, vel, goal-disp, wind]; NO obstacle geometry",
+      "apf": "center-distance, d0=6, adaptive lambda clip(1-d/300,0.15,0.55)",
+      "source": "frozen FAIR checkpoints results/rigorous/artifacts/H0_*"
+    },
+    {
+      "id": "H1", "role": "ablation_blind", "policy_mode": "a2c", "learned": true,
+      "obs": "12-D; NO obstacle geometry", "apf": "none",
+      "source": "frozen FAIR checkpoints results/rigorous/artifacts/H1_*"
+    },
+    {
+      "id": "H2", "role": "nonlearned_control", "policy_mode": "apf-only", "learned": false,
+      "obs": "n/a", "apf": "sensitivity grid over basis and d0 (see apf_sensitivity)",
+      "source": "no checkpoint; evaluated directly"
+    },
+    {
+      "id": "H3", "role": "ablation_matched_information", "policy_mode": "a2c", "learned": true,
+      "obs": "12-D base + 56-D padded RAW AABB geometry (K=8 slots, sorted by distance to UAV; per slot rel_center/300 (3), half_extents/300 (3), valid_mask (1)); total 68-D",
+      "apf": "NONE (no APF force in observation, no APF blending in action)",
+      "training": {"steps": 5000000, "seeds": [101, 211, 307, 401, 503],
+                   "maps": ["map-random-01", "map-corridor-01", "map-barrier-01", "map-mixed-01"],
+                   "hyperparameters": "identical to FAIR A2C: lr 3e-4, n_steps 256, gamma 0.99, gae 0.95, ent 0.02, max_grad_norm 0.5, n_envs 1, device cpu",
+                   "seeding": "random + numpy + vecenv seed + model.set_random_seed(seed) (adds explicit torch seeding vs FAIR)"},
+      "source": "trained by scripts/icai2026_experiments.py train-h3"
+    }
+  ],
+  "controller_matrix_columns": [
+    "Configuration", "Learned policy?", "Obstacle geometry to learned policy?",
+    "Obstacle geometry to APF?", "APF analytical action?", "Adaptive blend?", "Training budget"
+  ],
+  "evaluation": {
+    "seed_schedule": {"bases": [2001, 2011, 2021, 2031, 2041], "episodes_per_base": 10,
+                      "unique_seeds": "2001..2050 (50 unique; replaces FAIR 1009..1040 with 18 duplicates)",
+                      "shared_across_configs": true},
+    "policy": "deterministic",
+    "inferential_unit": "(map_id, training_seed); rollouts are descriptive only",
+    "wind_sweep": {"scales": [0.0, 0.5, 1.0, 1.5, 2.0],
+                   "definition": "single interpretable rule: wind velocity vector (base + gust) multiplied by wind_scale at every step, i.e. DroneEnv3D.wind_multiplier; 1.0 reproduces FAIR setting",
+                   "policy": "frozen checkpoints, no retraining"},
+    "heldout_maps": [
+      {"id": "map-random-ho1", "seed": 7101, "layout": "random", "distance_m": 300, "density": 0.8},
+      {"id": "map-corridor-ho1", "seed": 7113, "layout": "corridor", "distance_m": 300, "density": 0.8},
+      {"id": "map-barrier-ho1", "seed": 7119, "layout": "barrier", "distance_m": 300, "density": 0.8},
+      {"id": "map-mixed-ho1", "seed": 7127, "layout": "mixed", "distance_m": 300, "density": 0.8}
+    ],
+    "heldout_note": "new map seeds, same generator and density; H0 sees held-out geometry through APF, so this is controller-level transfer with map geometry available, NOT obstacle-free zero-shot generalization"
+  },
+  "apf_sensitivity": {
+    "basis": ["center", "surface"],
+    "d0_grid_m": [4.0, 6.0, 8.0, 12.0],
+    "predeclared": true,
+    "rule": "report ALL 8 settings; no post-hoc selection of a favorable parameter"
+  },
+  "action_logging": {
+    "config": "H0",
+    "fields": ["a_A2C", "a_APF", "lambda_t", "blended action", "goal distance",
+               "nearest surface clearance", "episode outcome"],
+    "diagnostics": ["mean norms of a_A2C / a_APF / blended", "cosine alignment A2C vs APF",
+                    "lambda distribution", "mean consecutive blended-action change"],
+    "interpretation": "mechanistic diagnostics only; not causal proof of smoothness"
+  },
+  "statistics": {
+    "paired_tests": "two-sided Wilcoxon signed-rank on (map, training_seed) units for H0-H1 and H0-H3 and H3-H1",
+    "effect_sizes": "Cohen dz with exact p-values",
+    "multiplicity": "exploratory; no post-hoc family expansion for wind/held-out sweeps",
+    "wind_and_heldout": "descriptive curves and per-map/per-model summaries; Wilson intervals descriptive only"
+  },
+  "dropped": {
+    "H4_same_grid_spline": "removed as named configuration per page-budget decision; retained only as a one-line note",
+    "fixed_lambda_causal_ablation": "P2; only evaluation-time blend sensitivity if time remains, labelled as such"
+  },
+  "commands": {
+    "h3_training": "bash scripts/icai2026_train_h3.sh   # 6 parallel jobs, OMP_NUM_THREADS=4",
+    "corrected_eval": "python scripts/icai2026_experiments.py eval --configs H0 H1 --maps train --seeds 101 211 307 401 503 --tag icai_eval_unique",
+    "wind_sweep": "python scripts/icai2026_experiments.py eval --configs H0 H1 --maps train --seeds 101 211 307 401 503 --wind-scales 0.0 0.5 1.5 2.0 --tag icai_wind_sweep",
+    "heldout": "python scripts/icai2026_experiments.py eval --configs H0 H1 --maps heldout --seeds 101 211 307 401 503 --tag icai_heldout",
+    "action_log": "python scripts/icai2026_experiments.py eval --configs H0 --maps train --seeds 101 211 307 401 503 --tag icai_action_log --log-actions",
+    "apf_sensitivity": "python scripts/icai2026_experiments.py apf-sensitivity --maps train --tag icai_apf_sensitivity",
+    "h3_eval_after_training": "python scripts/icai2026_experiments.py eval --configs H3 --maps train --seeds 101 211 307 401 503 --tag icai_eval_unique_h3"
+  }
+}

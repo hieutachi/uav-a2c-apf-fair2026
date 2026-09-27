@@ -62,6 +62,32 @@ make figures    # sinh bảng/biểu đồ vào tables/generated và figures/gen
 Trạng thái đối soát: **69/69 claim** (29 EXACT_MATCH, 40 ROUNDING_MATCH, 0 MISMATCH, 0 UNREPRODUCIBLE);
 25/25 test PASS; quyết định release **CONDITIONAL PASS** (xem `reproducibility/reports/result_lock_certificate.md`).
 
+## Bản web giảng dạy (có bảo vệ)
+
+Trang hệ thống hóa kiến thức (16 phần, 32 công thức, 17 hình/biểu đồ/sơ đồ, 23 bảng, glossary và 18 câu hỏi
+ôn tập) được publish tại:
+
+<https://uav-a2c-apf-fair2026-8nchu0xfadn.qoder.website>
+
+Chế độ truy cập **selected**: chỉ những người được chủ repo mời mới đọc được; người lạ nhận 401.
+Bản offline tự chứa nằm ở `site/index.html` (mở trực tiếp bằng trình duyệt, không cần mạng).
+
+## ICAI-FAI 2026 revision (sau khi bản FAIR bị từ chối)
+
+Thư mục `icai2026/` chứa toàn bộ nhánh revision: báo cáo `REPORT_ICAI2026_REVISION.md`, giao thức
+`experiments/icai2026_manifest.json`, code thí nghiệm, kết quả máy đọc được, và bản thảo 5 trang
+`paper/icai2026/main.pdf`. Năm kết quả trung tâm:
+
+1. Với lịch 50 seed duy nhất đã sửa, H0−H1 còn −15.2 điểm % (d_z = −0.491, p = 0.0156, n = 20).
+2. Baseline khớp thông tin H3 (A2C nhận hình học AABB thô, không APF) đạt 938/1000: khoảng cách tin cậy
+   tách thành +9.0 pp (thông tin, p = 0.250) và +6.2 pp (kênh giải tích, p = 0.125) — riêng lẻ không đáng kể.
+3. Đóng góp có ý nghĩa thống kê của kênh giải tích là giảm biến thiên quỹ đạo (H0−H3 jitter d_z = −1.97,
+   accel d_z = −4.08, p < 0.001; H3−H1 null).
+4. Stress test gió trên policy đông cứng: H0 giữ 98.6% ở 2× cường độ gió huấn luyện; H1 phẳng theo gió.
+5. Lưới sensitivity khai báo trước cho thấy repulsion theo khoảng cách tâm CHẾT (đồng nhất 21/200 với
+   d0 = 4–12 m); bản surface xóa toàn bộ va chạm (0/200) nhưng vẫn timeout 56% — và một họ layout held-out
+   (mixed-ho1) làm sụp cả ba controller.
+
 ## Trích dẫn
 
 Xem `reproducibility/CITATION.cff`. Giấy phép: mã nguồn và script theo MIT (`reproducibility/LICENSE`);
