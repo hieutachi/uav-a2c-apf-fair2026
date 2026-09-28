@@ -222,7 +222,10 @@ BAD_STRINGS = {
     "arithmetic": ["36 coll", "89–100"],
     "stale_status": ["RUNNING", "aggregating", "PENDING", "TODO"],
     "causal_overreach": ["causal decomposition", "decomposes additively", "accounts for most",
-                         "59%", "caused by obstacle information", "APF independently improves"],
+                         "59%", "caused by obstacle information", "APF independently improves",
+                         "survives information matching", "surviving information matching",
+                         "driven by its attractive bias", "associated with most of the point-estimate",
+                         "perfectly information-matched", "perfectly information matched"],
     "apf_wording": ["broken distance convention", "broken APF", "defective",
                     "removes collisions entirely", "eliminates collisions"],
     "wind_wording": ["not wind-driven", "geometry- and control-driven"],
@@ -235,7 +238,8 @@ targets = [ROOT / "REPORT_ICAI2026_REVISION.md",
 # is also exempt from the causal category.
 QUOTE_SECTIONS = ("10. Correction log", "16. Title audit", "17. Manuscript rewrite checklist",
                   "18. GO / NO-GO gate")
-NEGATIONS = ("not a causal decomposition", "NOT a causal", "no causal decomposition")
+NEGATIONS = ("not a causal decomposition", "NOT a causal", "no causal decomposition",
+               'NOT "perfectly', "NOT a perfectly", "not perfectly information")
 lang_hits = defaultdict(list)
 for t in targets:
     section = ""

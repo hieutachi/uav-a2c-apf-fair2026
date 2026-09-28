@@ -1,8 +1,8 @@
 {
-  "generated_utc": "2026-09-27T23:51:15.114925+00:00",
+  "generated_utc": "2026-09-27T23:59:20.979878+00:00",
   "generator": {
     "script": "scripts/icai2026_consistency_check.py",
-    "sha256": "45729eab7c10589d"
+    "sha256": "6d83ace07fe655f3"
   },
   "source_of_truth": [
     "raw CSVs in results/icai2026/",

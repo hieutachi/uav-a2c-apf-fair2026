@@ -110,7 +110,7 @@ H0−H1 contrast is supported at the paired unit level; the two intermediate con
 significant. This is a **descriptive partition of the observed point-estimate gap** across obstacle-blind,
 geometry-aware, and analytical-hybrid configurations — not a causal decomposition. The strongest statistically
 supported effect associated with the analytical hybrid channel is reduced **sampled trajectory variation**
-(finite-difference jerk and acceleration), and that effect survives information matching (H0−H3 significant,
+(finite-difference jerk and acceleration), and this contrast persists against the geometry-aware baseline (H0−H3 significant,
 H3−H1 null).
 
 ### 6.3 Wind stress test (frozen policies; 1000 rollouts per config × scale)
@@ -207,7 +207,8 @@ Per-map and per-seed rates are in the JSON (all zero for the center basis). Conc
 strength: **the center-distance repulsive term was never activated under the evaluated trajectories**, on both
 H0 and H2 paths; the surface-distance variant activates on ~30.6% of H2 timesteps and would have activated on
 ~2.0% of H0 timesteps (54.9% of episodes) had it been the shipped basis. The hybrid's nominal-map behavior is
-therefore driven by its attractive bias and adaptive weighting, not by obstacle repulsion. The label
+Under the nominal maps, the active analytical contribution consists of the attractive term and adaptive
+blending; no center-distance obstacle-repulsion activation was measured. The label
 "A2C–APF obstacle-avoidance hybrid" overstates what the APF channel does on these maps: it is an
 attractive-bias guidance channel whose repulsion is inactive under the evaluated geometry and trajectories.
 
@@ -263,7 +264,7 @@ stale status, arithmetic, causal-overreach, APF/wind/held-out wording, and FAIR 
 
 Supported (under the evaluated simulator and protocol):
 - H0 > H1 completion on corrected seeds (−15.2 pp, p = 0.0156) and lower sampled trajectory variation (p < 0.001).
-- The variation effect survives information matching (H0−H3 significant; H3−H1 null).
+- The variation contrast persists against the geometry-aware baseline (H0−H3 significant; H3−H1 null).
 - Graceful frozen-hybrid degradation to 2× nominal wind; deployment-time blend sensitivity.
 - Center-distance repulsion inactive on evaluated trajectories (direct measurement); surface basis changes H2's
   failure mode from collision to stagnation.
@@ -288,15 +289,15 @@ may reflect power, not absence of effect — stated as such, never as evidence o
    and reduced sampled trajectory variation versus obstacle-blind A2C, with the information asymmetry disclosed.
 2. Correct confound: H0−H1 mixed the analytic channel with privileged obstacle geometry.
 3. H3 establishes: a geometry-aware, APF-free baseline sits between H1 and H0 in completion rate; obstacle
-   information is associated with most of the point-estimate gap; the variation benefit of the hybrid survives
-   information matching.
+   the intermediate contrasts are H3−H1 = +9.0 pp and H0−H3 = +6.2 pp, neither statistically supported at
+   n = 20; the variation contrast persists against the geometry-aware baseline.
 4. H3 does NOT establish: a significant reliability increment for either ingredient alone; causal attribution;
    equivalence of representations.
 5. Strongest statistically supported new finding: H0−H3 reduction in sampled trajectory variation
    (jitter d_z = −1.97, acceleration d_z = −4.08, p < 0.001) with H3−H1 null — plus the direct measurement that
    center-distance repulsion never activates.
-6. Mechanism of H0 on nominal maps: a steady attractive bias (‖a_APF‖ = k_att exactly) blended adaptively;
-   repulsion inactive; deployment behavior sensitive to λ.
+6. Mechanism of H0 on nominal maps: the active analytical contribution consists of the attractive term
+   (‖a_APF‖ = k_att exactly) and adaptive blending; no center-distance repulsion activation was measured; deployment behavior sensitive to λ.
 7. The label "A2C–APF obstacle-avoidance hybrid" is inaccurate for the nominal maps: avoidance (repulsion) does
    not engage; what engages is attraction plus adaptive weighting.
 8. Surface-distance sensitivity reinterprets old H2: its collision catastrophe was a distance-convention artifact;
@@ -370,7 +371,7 @@ Direction: 1 or 3 (audit vocabulary, no causal separation implied, no novelty la
   p < 0.001) and acceleration −8.87 (d_z −4.08, p < 0.001); H3−H1 variation null; activation 0/103,682 (H0 center);
   wind 100/100/100/99.5/98.6% (H0); held-out mixed 50/17/0 per 250; fixed-λ 990/795/606.
 - Chosen framing: B (empirical audit), with A as experimental spine, C as subsection.
-- Claim hierarchy: (1) variation effect surviving information matching; (2) direct activation measurement;
+- Claim hierarchy: (1) variation contrast persisting against the geometry-aware baseline; (2) direct activation measurement;
   (3) descriptive reliability ordering with significant total only; (4) bounded stress-test evidence;
   (5) all nulls visible.
 - Title direction: audit vocabulary (alternative 1 or 3); current "Disentangling…" title to be softened.
